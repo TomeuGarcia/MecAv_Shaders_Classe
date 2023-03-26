@@ -3,6 +3,7 @@ Shader "01_FXStack/Shader_01_FXStack_Normals"
     Properties
     {
         _MainTex ("Texture", 2D) = "white" {}
+        _ObjectOrWorldNormals ("Object or World Normals", Range(0.0, 1.0)) = 1.0
     }
     SubShader
     {
@@ -28,11 +29,12 @@ Shader "01_FXStack/Shader_01_FXStack_Normals"
                 float2 uv : TEXCOORD0;
                 float4 vertex : SV_POSITION;
                 half3 worldNormal : NORMAL;
-                half3 cameraForward : TEXCOORD1;
+                half3 objectNormal : TEXCOORD1;
             };
 
             sampler2D _MainTex;
             float4 _MainTex_ST;
+            float _ObjectOrWorldNormals;
 
             v2f vert (appdata v)
             {
@@ -40,11 +42,10 @@ Shader "01_FXStack/Shader_01_FXStack_Normals"
                 o.vertex = UnityObjectToClipPos(v.vertex);
                 o.uv = TRANSFORM_TEX(v.uv, _MainTex);
 
-                //o.worldNormal = normalize(v.normal); // Object Space
+                o.objectNormal = normalize(v.normal); // Object Space
                 o.worldNormal = UnityObjectToWorldNormal(v.normal); // World Space
 
                 half3 cameraForwardObjectSpace = half3(0,0,1);
-                o.cameraForward =  mul((float3x3)unity_CameraToWorld, cameraForwardObjectSpace);                
 
                 return o;
             }
@@ -52,9 +53,7 @@ Shader "01_FXStack/Shader_01_FXStack_Normals"
             fixed4 frag (v2f i) : SV_Target
             {
                 fixed4 col = fixed4(0,0,0,1);
-                col.xyz = i.worldNormal;
-
-                col.xyz = 1.0-abs(dot(i.worldNormal, i.cameraForward));
+                col.xyz = lerp(i.objectNormal, i.worldNormal, _ObjectOrWorldNormals);
 
                 return col;
             }
