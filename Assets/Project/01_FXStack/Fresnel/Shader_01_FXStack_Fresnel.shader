@@ -16,6 +16,7 @@ Shader "01_FXStack/Shader_01_FXStack_Fresnel"
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
+            #pragma target 4.5            
             #include "UnityCG.cginc"
 
             struct appdata
@@ -34,6 +35,7 @@ Shader "01_FXStack/Shader_01_FXStack_Fresnel"
                 float3 worldPosition : TEXCOORD1;
                 half3 cameraForward : TEXCOORD2;
                 float2 screenSpaceUV : TEXCOORD3;
+                half3 dirToCam : TEXCOORD4;
             };
 
             sampler2D _MainTex;
@@ -42,9 +44,8 @@ Shader "01_FXStack/Shader_01_FXStack_Fresnel"
             fixed4 _OutlineColor;
 
 
-            float fresnel(half3 worldSpaceVertexPosition, half3 worldSpaceVertexNormal, half exponent, half3 camForward)
+            float fresnel(half3 dirToCam, half3 worldSpaceVertexNormal, half exponent, half3 camForward)
             {
-                half3 dirToCam = normalize(_WorldSpaceCameraPos - worldSpaceVertexPosition);                  
                 float value = saturate(dot(worldSpaceVertexNormal, dirToCam));
                 //float value = saturate(dot(worldSpaceVertexNormal, -camForward));
                 value = 1.0 - value;
@@ -84,6 +85,8 @@ Shader "01_FXStack/Shader_01_FXStack_Fresnel"
                 half4 cameraForwardObjectSpace = half4(0, 0, 1, 0);
                 o.cameraForward =  normalize(mul(unity_CameraToWorld, cameraForwardObjectSpace).xyz); // World Space CAMERA NORMAL    
 
+                o.dirToCam = normalize(_WorldSpaceCameraPos - o.worldPosition);  
+
                 return o;
             }            
 
@@ -95,8 +98,8 @@ Shader "01_FXStack/Shader_01_FXStack_Fresnel"
 
                 fixed4 col = tex2D(_MainTex, uv);
 
-                float interpolation = fresnel(i.worldPosition, i.worldNormal, _FresnelExponent, i.cameraForward);
-                col.xyz = lerp(col, _OutlineColor, interpolation);
+                float interpolation = fresnel(i.dirToCam, i.worldNormal, _FresnelExponent, i.cameraForward);
+                col.xyz = lerp(col.xyz, _OutlineColor.xyz, interpolation);
                 
                 return col;
             }

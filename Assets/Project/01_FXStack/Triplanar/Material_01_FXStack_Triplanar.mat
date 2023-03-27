@@ -7,8 +7,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Material_01_FXStack_Fresnel
-  m_Shader: {fileID: 4800000, guid: 66de4e8cd8cc3334bb05653f88d9e400, type: 3}
+  m_Name: Material_01_FXStack_Triplanar
+  m_Shader: {fileID: 4800000, guid: 8a6947ef3cb91ae40bddaa04652788f6, type: 3}
   m_ValidKeywords: []
   m_InvalidKeywords: []
   m_LightmapFlags: 4
@@ -21,12 +21,19 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _MainTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _TextureSides:
+        m_Texture: {fileID: 2800000, guid: e7e67c5b7e54c514693d5808433bf2c5, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _TextureUp:
         m_Texture: {fileID: 2800000, guid: 4985fbf2c12798c4886b3fd6f3936ff6, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _FresnelExponent: 1.92
-    m_Colors:
-    - _OutlineColor: {r: 1, g: 0, b: 0.07060623, a: 1}
+    - _Falloff: 1
+    m_Colors: []
   m_BuildTextureStacks: []
