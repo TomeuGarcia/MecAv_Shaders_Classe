@@ -7,13 +7,13 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Material_01_FXStack_Phong
-  m_Shader: {fileID: 4800000, guid: e4b7464ee2fa5714b9762561d1de8e6f, type: 3}
+  m_Name: Material_01_FXStack_Outline
+  m_Shader: {fileID: 4800000, guid: 178fcae89f14d4143b289f4d75bf0706, type: 3}
   m_ValidKeywords: []
   m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
-  m_DoubleSidedGI: 1
+  m_DoubleSidedGI: 0
   m_CustomRenderQueue: -1
   stringTagMap: {}
   disabledShaderPasses: []
@@ -26,10 +26,9 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _AmbientStrength: 0.11
-    - _SpecularExp: 1
-    - _SpecularPow: 64
-    - _SpecularStrength: 8.26
+    - _NormalToOriginDisplacement: 1
+    - _NormalVSOriginDisplacement: 0
+    - _OutlineWidth: 0.2
     m_Colors:
-    - _AmbientColor: {r: 0.8899352, g: 0.8160377, b: 1, a: 1}
+    - _OutlineColor: {r: 0.18560876, g: 0.9150943, b: 0.49008968, a: 1}
   m_BuildTextureStacks: []
