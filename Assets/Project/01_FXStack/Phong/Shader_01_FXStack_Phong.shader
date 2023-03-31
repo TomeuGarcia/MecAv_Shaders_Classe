@@ -76,13 +76,29 @@ Shader "01_FXStack/Shader_01_FXStack_Phong"
                 return specularColor;
             }
 
-            fixed4 computePhong(half3 directionToCamera, float3 vertexPosition, half3 vertexNormal, float3 lightPosition, float3 lightDirection, fixed4 lightColor)
+            fixed4 applyPhong(fixed4 baseColor, float3 vertexPosition, half3 vertexNormal)
             {
-                fixed4 ambientColor = computeAmbient(lightColor);
-                fixed4 diffuseColor = computeDiffuse(vertexPosition, vertexNormal, lightPosition, lightColor);
-                fixed4 specularColor = computeSpecular(directionToCamera, vertexNormal, lightDirection, lightColor);
+                half3 directionToCamera = normalize(_WorldSpaceCameraPos - vertexPosition); // Better results if computed in FRAGMENT
 
-                return ambientColor + diffuseColor + specularColor;
+
+                // DIRECTIONAL LIGHT
+                // _LightColor0 = DirectionalLight color
+                half3 directionalLightDirection = _WorldSpaceLightPos0.xyz * (1 - _WorldSpaceLightPos0.w); 
+                float3 directionalLightPosition = float3(0,0,0);
+
+                fixed4 ambientColor = computeAmbient(_AmbientColor);
+                fixed4 diffuseColor = computeDiffuse(vertexPosition, vertexNormal, directionalLightPosition, _AmbientColor);
+                fixed4 specularColor = computeSpecular(directionToCamera, vertexNormal, directionalLightDirection, _AmbientColor);        
+
+                // POINT LIGHT
+                //half3 pointLightPosition = _WorldSpaceLightPos0.xyz * _WorldSpaceLightPos0.w; // Hmmmmm now compute spot light phong
+                //diffuseColor += computeDiffuse(vertexPosition, vertexNormal, pointLightPosition, _AmbientColor);
+
+
+                baseColor = (ambientColor + diffuseColor + specularColor) * baseColor;
+                baseColor.w = 1.0;
+
+                return baseColor;                
             }
 
 
@@ -106,20 +122,10 @@ Shader "01_FXStack/Shader_01_FXStack_Phong"
             fixed4 frag (v2f i) : SV_Target
             {
                 fixed4 baseColor = tex2D(_MainTex, i.uv);
-
-                half3 directionToCamera = normalize(_WorldSpaceCameraPos - i.worldPosition); // Better results if computed in FRAGMENT
-
-                // _LightColor0 = DirectionalLight color
-                half3 directionalLightDirection = _WorldSpaceLightPos0.xyz * (1 - _WorldSpaceLightPos0.w);
-                fixed4 directionalLightColor = computePhong(directionToCamera, i.worldPosition, i.worldNormal, float3(0, 0, 0), directionalLightDirection, _AmbientColor); 
-
-                half3 pointLightColor = _WorldSpaceLightPos0.xyz * _WorldSpaceLightPos0.w; // Hmmmmm now compute spot light phong
-
-                 
-                fixed4 resultColor = baseColor * directionalLightColor;
-                resultColor.w = 1.0;
                 
-                return resultColor;
+                baseColor = applyPhong(baseColor, i.worldPosition, i.worldNormal); 
+                
+                return baseColor;
             }
             ENDCG
         }
