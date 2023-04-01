@@ -4,7 +4,7 @@ Shader "01_FXStack/Shader_01_FXStack_Fresnel"
     {
         _MainTex ("Texture", 2D) = "white" {}
         _OutlineColor("Outline Color", Color) = (1.0, 0.0, 0.0, 1.0)
-        _FresnelExponent("Fresnel Strength", Range(0.0, 5.0)) = 1.0        
+        _FresnelExponent("Fresnel Strength", Range(0.0, 5.0)) = 1.0      
     }
     SubShader
     {
@@ -95,6 +95,11 @@ Shader "01_FXStack/Shader_01_FXStack_Fresnel"
                 float2 uv = i.screenSpaceUV;
                 uv.x *= _MainTex_ST.x;
                 uv.y *= _MainTex_ST.y;
+
+                // Panning
+                uv.x += _Time.y * _MainTex_ST.z;
+                uv.y += _Time.y * _MainTex_ST.w;
+
 
                 fixed4 col = tex2D(_MainTex, uv);
 

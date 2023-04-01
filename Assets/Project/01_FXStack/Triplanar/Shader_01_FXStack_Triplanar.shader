@@ -6,7 +6,7 @@ Shader "01_FXStack/Shader_01_FXStack_Triplanar"
 
         _TextureUp ("Texture Up", 2D) = "white" {}
         _TextureSides ("Texture Sides", 2D) = "white" {}
-        _Falloff("Blend FallOff", Range(0.0, 5.0)) = 0.25
+        _Falloff("Blend FallOff", Range(1.0, 8.0)) = 5.0
     }
     SubShader
     {
@@ -66,7 +66,7 @@ Shader "01_FXStack/Shader_01_FXStack_Triplanar"
                 float2 uv_right = worldPosition.yz;
 
                 // Calculate uv forward (yx) and assign as uv_forward
-                float2 uv_forward = worldPosition.yx;
+                float2 uv_forward = worldPosition.xy;
 
 
                 // tex2D(textureUp, uv_up)
@@ -98,10 +98,34 @@ Shader "01_FXStack/Shader_01_FXStack_Triplanar"
                 return color_up + color_right + color_forward;
             }
 
+            fixed4 getSeamlessTriplanarColor(float3 worldPosition, half3 worldNormal, sampler2D textureUp, sampler2D textureRight, sampler2D textureForward, fixed falloff)
+            {                
+                half3 absoluteWorldNormal = pow(abs(worldNormal), falloff);
+                half3 mappedNormal = dot(absoluteWorldNormal, half3(1, 1, 1));
+                half3 weights = absoluteWorldNormal / mappedNormal;               
+                
+
+                float2 uv_up = worldPosition.xz;
+                float2 uv_right = worldPosition.yz;
+                float2 uv_forward = worldPosition.xy;
+
+
+                fixed4 color_up = tex2D(textureUp, uv_up);
+                fixed4 color_right = tex2D(textureRight, uv_right);
+                fixed4 color_forward = tex2D(textureForward, uv_forward);
+
+
+                color_up *= weights.y;
+                color_right *= weights.x;
+                color_forward *= weights.z;
+
+                return color_up + color_right + color_forward;
+            }
+
 
             fixed4 frag (v2f i) : SV_Target
             {
-                fixed4 triplanarColor = getTriplanarColor(i.worldPosition, i.worldNormal, _TextureUp, _TextureSides, _TextureSides, _Falloff);
+                fixed4 triplanarColor = getSeamlessTriplanarColor(i.worldPosition, i.worldNormal, _TextureUp, _TextureSides, _TextureSides, _Falloff);
 
                 return triplanarColor;
             }
