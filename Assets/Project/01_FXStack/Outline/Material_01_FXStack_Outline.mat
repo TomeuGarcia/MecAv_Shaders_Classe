@@ -27,8 +27,8 @@ Material:
     m_Ints: []
     m_Floats:
     - _NormalToOriginDisplacement: 1
-    - _NormalVSOriginDisplacement: 1
-    - _OutlineWidth: 0.17
+    - _NormalVSOriginDisplacement: 0.51
+    - _OutlineWidth: 0.04
     m_Colors:
     - _OutlineColor: {r: 0.9137255, g: 0.18431371, b: 0.4926169, a: 1}
   m_BuildTextureStacks: []
