@@ -43,19 +43,6 @@ Shader "01_FXStack/Shader_01_FXStack_Triplanar"
             sampler2D _TextureUp;
             sampler2D _TextureSides;
 
-            v2f vert (appdata v)
-            {
-                v2f o;
-                o.vertex = UnityObjectToClipPos(v.vertex);
-                o.uv = TRANSFORM_TEX(v.uv, _MainTex);
-
-                // Calculate world position and assign it
-                o.worldPosition = mul(unity_ObjectToWorld, v.vertex).xyz;
-                // Calculate world normal and assign it
-                o.worldNormal = UnityObjectToWorldNormal(v.normal);
-
-                return o;
-            }
 
             fixed4 getTriplanarColor(float3 worldPosition, half3 worldNormal, sampler2D textureUp, sampler2D textureRight, sampler2D textureForward, fixed falloff)
             {
@@ -122,6 +109,19 @@ Shader "01_FXStack/Shader_01_FXStack_Triplanar"
                 return color_up + color_right + color_forward;
             }
 
+            v2f vert (appdata v)
+            {
+                v2f o;
+                o.vertex = UnityObjectToClipPos(v.vertex);
+                o.uv = TRANSFORM_TEX(v.uv, _MainTex);
+
+                // Calculate world position and assign it
+                o.worldPosition = mul(unity_ObjectToWorld, v.vertex).xyz;
+                // Calculate world normal and assign it
+                o.worldNormal = UnityObjectToWorldNormal(v.normal);
+
+                return o;
+            }
 
             fixed4 frag (v2f i) : SV_Target
             {

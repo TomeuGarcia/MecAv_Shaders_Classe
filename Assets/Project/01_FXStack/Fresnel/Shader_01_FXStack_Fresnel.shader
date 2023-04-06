@@ -13,6 +13,8 @@ Shader "01_FXStack/Shader_01_FXStack_Fresnel"
 
         Pass
         {
+            Cull Back
+
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag

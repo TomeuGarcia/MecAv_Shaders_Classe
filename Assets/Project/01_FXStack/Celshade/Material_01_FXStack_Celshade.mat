@@ -7,8 +7,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Material_01_FXStack_Outline
-  m_Shader: {fileID: 4800000, guid: 178fcae89f14d4143b289f4d75bf0706, type: 3}
+  m_Name: Material_01_FXStack_Celshade
+  m_Shader: {fileID: 4800000, guid: 05e577cd6bbaa7f428c6833374e31489, type: 3}
   m_ValidKeywords: []
   m_InvalidKeywords: []
   m_LightmapFlags: 4
@@ -21,14 +21,22 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: 4985fbf2c12798c4886b3fd6f3936ff6, type: 3}
+        m_Texture: {fileID: 2800000, guid: a48f479546cb31c4abb0604429de3e69, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _NormalToOriginDisplacement: 1
+    - _Brightness: 0.3
+    - _LightSteps: 0.386
+    - _LightStepsInverse: 0.3
+    - _LightStepsStrength: 0.467
     - _NormalVSOriginDisplacement: 0
-    - _OutlineWidth: 0.04
+    - _OutlineWidth: 0.1
+    - _RimSpread: 2.3
+    - _RimThinness: 0.45
+    - _RimThreshold: 1
+    - _RimWidth: 0.241
     m_Colors:
-    - _OutlineColor: {r: 0.9137255, g: 0.18431371, b: 0.4926169, a: 1}
+    - _AmbientColor: {r: 0.49803922, g: 0.57803386, b: 0.6039216, a: 1}
+    - _OutlineColor: {r: 0, g: 0.16237438, b: 0.20784314, a: 1}
   m_BuildTextureStacks: []
