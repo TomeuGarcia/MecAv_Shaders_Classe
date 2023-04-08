@@ -3,8 +3,12 @@ Shader "01_FXStack/Shader_01_FXStack_Fresnel"
     Properties
     {
         _MainTex ("Texture", 2D) = "white" {}
+
         _OutlineColor("Outline Color", Color) = (1.0, 0.0, 0.0, 1.0)
         _FresnelExponent("Fresnel Strength", Range(0.0, 5.0)) = 1.0      
+
+        _SpecularStrength ("Specular Strength", Range(0.0, 10.0)) = 1.0
+        _SpecularPow("Smoothness", Range(0.0, 1.0)) = 0.1
     }
     SubShader
     {
@@ -20,6 +24,7 @@ Shader "01_FXStack/Shader_01_FXStack_Fresnel"
             #pragma fragment frag
             #pragma target 4.5            
             #include "UnityCG.cginc"
+            #include "Lighting.cginc"
 
             struct appdata
             {
@@ -44,6 +49,7 @@ Shader "01_FXStack/Shader_01_FXStack_Fresnel"
             float4 _MainTex_ST;
             half _FresnelExponent;
             fixed4 _OutlineColor;
+            float _SpecularStrength, _SpecularPow;
 
 
             float fresnel(half3 dirToCam, half3 worldSpaceVertexNormal, half exponent, half3 camForward)
@@ -71,6 +77,17 @@ Shader "01_FXStack/Shader_01_FXStack_Fresnel"
             }
 
 
+            fixed4 computeSpecular(half3 directionToCamera, half3 vertexNormal, half3 lightDirection, fixed4 lightColor)
+            {
+                half3 halfWayDir = normalize(directionToCamera + lightDirection);
+
+                half specularCoef = saturate(dot(vertexNormal, halfWayDir));
+                specularCoef = pow(specularCoef, _SpecularPow * 100.0);
+
+                fixed4 specularColor = _SpecularStrength * specularCoef * lightColor;
+
+                return specularColor;
+            }
 
 
             v2f vert (appdata v)
@@ -102,8 +119,10 @@ Shader "01_FXStack/Shader_01_FXStack_Fresnel"
                 uv.x += _Time.y * _MainTex_ST.z;
                 uv.y += _Time.y * _MainTex_ST.w;
 
-
                 fixed4 col = tex2D(_MainTex, uv);
+
+                half3 directionToCamera = normalize(_WorldSpaceCameraPos - i.worldPosition);
+                col += computeSpecular(directionToCamera, i.worldNormal, _WorldSpaceLightPos0.xyz, _LightColor0);
 
                 float interpolation = fresnel(i.dirToCam, i.worldNormal, _FresnelExponent, i.cameraForward);
                 col.xyz = lerp(col.xyz, _OutlineColor.xyz, interpolation);

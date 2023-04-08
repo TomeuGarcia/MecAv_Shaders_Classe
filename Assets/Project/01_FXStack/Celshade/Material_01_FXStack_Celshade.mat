@@ -29,7 +29,7 @@ Material:
     - _Brightness: 0.3
     - _LightSteps: 0.386
     - _LightStepsInverse: 0.3
-    - _LightStepsStrength: 0.467
+    - _LightStepsStrength: 0.8
     - _NormalVSOriginDisplacement: 0
     - _OutlineWidth: 0.1
     - _RimSpread: 2.3

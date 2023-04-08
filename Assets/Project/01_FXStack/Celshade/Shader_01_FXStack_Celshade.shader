@@ -4,7 +4,7 @@ Shader "01_FXStack/Shader_01_FXStack_Celshade"
     {
         _MainTex ("Texture", 2D) = "white" {}
         
-        _LightStepsInverse("Light Steps Inverse", Range(0.0, 1.0)) = 0.3
+        _LightStepsInverse("Light Steps Inverse", Range(0.01, 1.0)) = 0.3
         _LightStepsStrength("Light Steps Strength", Range(0.0, 1.0)) = 0.3
         _Brightness("Brightness", Range(0.0, 1.0)) = 0.3
 
@@ -111,10 +111,10 @@ Shader "01_FXStack/Shader_01_FXStack_Celshade"
             float _RimThinness, _RimThreshold;
 
 
-            float SteppedLight(half3 worldNormal, half3 lightDirection)
+            float stepLight(half3 worldNormal, half3 lightDirection)
             {
-                float lightIntensity = saturate(dot(worldNormal, lightDirection));
-                return floor(lightIntensity / _LightStepsInverse);
+                float diffuseLight = saturate(dot(worldNormal, lightDirection));
+                return floor(diffuseLight / _LightStepsInverse) * _LightStepsInverse;
             }
 
             float fresnel(half3 dirToCam, half3 worldSpaceVertexNormal, half exponent)
@@ -152,7 +152,7 @@ Shader "01_FXStack/Shader_01_FXStack_Celshade"
             {
                 fixed4 textureColor = tex2D(_MainTex, i.uv);
 
-                float steppedLight = SteppedLight(i.worldNormal, _WorldSpaceLightPos0.xyz) * _LightStepsStrength * _LightColor0;               
+                float steppedLight = stepLight(i.worldNormal, _WorldSpaceLightPos0.xyz) * _LightStepsStrength * _LightColor0;               
                 float rim = rimLight(i.worldNormal, i.worldPosition, _WorldSpaceLightPos0.xyz);
 
                 textureColor *= steppedLight + _Brightness + rim;
