@@ -4,6 +4,9 @@ Shader "01_FXStack/Shader_01_FXStack_Displacement"
     {
         _MainTex ("Texture", 2D) = "white" {}
         _MaxHeight ("Displacement Max Height", Range(0.0, 10.0)) = 1.0
+
+        _ColorTop("Top Color", Color) = (1, 0, 0, 1)
+        _ColorBottom("Bottom Color", Color) = (0, 0, 0, 1)
     }
     SubShader
     {
@@ -40,6 +43,8 @@ Shader "01_FXStack/Shader_01_FXStack_Displacement"
             float4 _MainTex_ST;
             float _MaxHeight;
 
+            fixed4 _ColorTop, _ColorBottom;
+
             v2f vert (appdata v)
             {
                 v2f o;
@@ -63,9 +68,9 @@ Shader "01_FXStack/Shader_01_FXStack_Displacement"
             fixed4 frag (v2f i) : SV_Target
             {
                 // sample the texture
-                fixed col  = saturate(i.displacement);
+                fixed4 col  = lerp(_ColorBottom, _ColorTop, i.displacement);
 
-                return fixed4(col, col, col, 1);
+                return col;
             }
             ENDCG
         }

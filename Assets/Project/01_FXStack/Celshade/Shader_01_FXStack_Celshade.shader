@@ -5,7 +5,7 @@ Shader "01_FXStack/Shader_01_FXStack_Celshade"
         _MainTex ("Texture", 2D) = "white" {}
         
         _LightStepsInverse("Light Steps Inverse", Range(0.01, 1.0)) = 0.3
-        _LightStepsStrength("Light Steps Strength", Range(0.0, 1.0)) = 0.3
+        _LightStepsStrength("Light Steps Strength", Range(0.0, 2.0)) = 0.3
         _Brightness("Brightness", Range(0.0, 1.0)) = 0.3
 
         _RimThinness("Rim Light Thinness", Range(0.0, 1.0)) = 0.1
@@ -104,7 +104,7 @@ Shader "01_FXStack/Shader_01_FXStack_Celshade"
             sampler2D _MainTex;
             float4 _MainTex_ST;
             fixed4 _AmbientColor;
-            float _LightStepsInverse;
+            half _LightStepsInverse;
             float _LightStepsStrength;
             float _Brightness;
 
