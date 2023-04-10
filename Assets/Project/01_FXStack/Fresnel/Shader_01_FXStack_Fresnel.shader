@@ -110,7 +110,7 @@ Shader "01_FXStack/Shader_01_FXStack_Fresnel"
             }            
 
             fixed4 frag (v2f i) : SV_Target
-            {                
+            {               
                 float2 uv = i.screenSpaceUV;
                 uv.x *= _MainTex_ST.x;
                 uv.y *= _MainTex_ST.y;

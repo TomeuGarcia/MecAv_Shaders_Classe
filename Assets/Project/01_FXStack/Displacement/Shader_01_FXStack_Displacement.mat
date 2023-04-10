@@ -27,8 +27,8 @@ Material:
     m_Ints: []
     m_Floats:
     - _DisplacementTextureSize: 1
-    - _MaxHeight: 6
+    - _MaxHeight: 8
     m_Colors:
-    - _ColorBottom: {r: 0.049127806, g: 0.071096994, b: 0.1509434, a: 1}
-    - _ColorTop: {r: 0, g: 1, b: 0.49104095, a: 1}
+    - _ColorBottom: {r: 0, g: 0, b: 0, a: 1}
+    - _ColorTop: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
