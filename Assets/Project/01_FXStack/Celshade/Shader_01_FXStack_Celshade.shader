@@ -84,6 +84,7 @@ Shader "01_FXStack/Shader_01_FXStack_Celshade"
 
             #include "UnityCG.cginc"
             #include "Lighting.cginc"
+            #include "../../MyShaderLibraries/MyFunctions.cginc"
 
             struct appdata
             {
@@ -111,19 +112,11 @@ Shader "01_FXStack/Shader_01_FXStack_Celshade"
             float _RimThinness, _RimThreshold;
 
 
-            float stepLight(half3 worldNormal, half3 lightDirection)
+            float stepDiffuseLight(half3 worldNormal, half3 lightDirection, float lightStepsInverse)
             {
                 float diffuseLight = saturate(dot(worldNormal, lightDirection));
-                return floor(diffuseLight / _LightStepsInverse) * _LightStepsInverse;
+                return floor(diffuseLight / lightStepsInverse) * lightStepsInverse;
             }
-
-            float fresnel(half3 dirToCam, half3 worldSpaceVertexNormal, half exponent)
-            {
-                float value = saturate(dot(worldSpaceVertexNormal, dirToCam));
-                value = 1.0 - value;
-                value = pow(value, exponent);
-                return value;
-            } 
 
             float rimLight(half3 worldNormal, float3 worldPosition, half3 lightDirection)
             {
@@ -152,7 +145,7 @@ Shader "01_FXStack/Shader_01_FXStack_Celshade"
             {
                 fixed4 textureColor = tex2D(_MainTex, i.uv);
 
-                float steppedLight = stepLight(i.worldNormal, _WorldSpaceLightPos0.xyz) * _LightStepsStrength * _LightColor0;               
+                float steppedLight = stepDiffuseLight(i.worldNormal, _WorldSpaceLightPos0.xyz, _LightStepsInverse) * _LightStepsStrength * _LightColor0;               
                 float rim = rimLight(i.worldNormal, i.worldPosition, _WorldSpaceLightPos0.xyz);
 
                 textureColor *= steppedLight + _Brightness + rim;

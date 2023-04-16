@@ -22,6 +22,7 @@ Shader "01_FXStack/Shader_01_FXStack_Phong"
 
             #include "UnityCG.cginc"
             #include "Lighting.cginc"
+            #include "../../MyShaderLibraries/MyLighting.cginc"
 
             struct appdata
             {
@@ -47,51 +48,6 @@ Shader "01_FXStack/Shader_01_FXStack_Phong"
             half _SpecularStrength, _SpecularPow;
             
 
-
-            fixed4 computeAmbient(float4 lightColor)
-            {
-                fixed4 ambientColor = _AmbientStrength * lightColor;
-                return ambientColor;
-            }
-
-            fixed4 computeDiffuse(float3 vertexPosition, half3 vertexNormal, float3 lightPosition, fixed4 lightColor)
-            {
-                half3 directionToLight = normalize(lightPosition - vertexPosition);
-                half diffuseCoef = saturate(dot(vertexNormal, directionToLight));
-
-                fixed4 diffuseColor = diffuseCoef * lightColor;
-
-                return diffuseColor;
-            }
-
-            fixed4 computeSpecular(half3 directionToCamera, half3 vertexNormal, half3 lightDirection, fixed4 lightColor)
-            {
-                half3 halfWayDir = normalize(directionToCamera + lightDirection);
-
-                half specularCoef = saturate(dot(vertexNormal, halfWayDir));
-                specularCoef = pow(specularCoef, _SpecularPow * 100.0);
-
-                fixed4 specularColor = _SpecularStrength * specularCoef * lightColor;
-
-                return specularColor;
-            }
-
-            fixed4 applyPhong(fixed4 baseColor, float3 vertexPosition, half3 vertexNormal, float3 lightPosition, half3 lightDirection, fixed4 lightColor)
-            {
-                half3 directionToCamera = normalize(_WorldSpaceCameraPos - vertexPosition); // Better results if computed in FRAGMENT
-
-                fixed4 ambientColor = computeAmbient(lightColor);
-                fixed4 diffuseColor = computeDiffuse(vertexPosition, vertexNormal, lightPosition, lightColor);
-                fixed4 specularColor = computeSpecular(directionToCamera, vertexNormal, lightDirection, lightColor);        
-
-                baseColor = ambientColor + (diffuseColor * baseColor) + specularColor;
-                baseColor.w = 1.0;
-
-                return baseColor;
-            }
-
-
-
             v2f vert (appdata v)
             {
                 v2f o;
@@ -113,7 +69,9 @@ Shader "01_FXStack/Shader_01_FXStack_Phong"
                 fixed4 baseColor = tex2D(_MainTex, i.uv);
 
                 // DIRECTIONAL LIGHT
-                baseColor = applyPhong(baseColor, i.worldPosition, i.worldNormal, float3(0,0,0), _WorldSpaceLightPos0.xyz, _AmbientColor);
+                half3 directionToCamera = normalize(_WorldSpaceCameraPos - i.worldPosition); // Better results if computed in FRAGMENT
+                baseColor = applyPhong(baseColor, i.worldPosition, i.worldNormal, directionToCamera, float3(0,0,0), _WorldSpaceLightPos0.xyz, _AmbientColor,
+                _AmbientStrength, _SpecularStrength, _SpecularPow);
                 
                 return baseColor;
             }
@@ -144,6 +102,7 @@ Shader "01_FXStack/Shader_01_FXStack_Phong"
 
             #include "UnityCG.cginc"
             #include "Lighting.cginc"
+            #include "../../MyShaderLibraries/MyLighting.cginc"
             #include "AutoLight.cginc"
 
             struct appdata
@@ -168,50 +127,6 @@ Shader "01_FXStack/Shader_01_FXStack_Phong"
             half _AmbientStrength;
             half _SpecularStrength, _SpecularPow;
             
-
-
-            fixed4 computeAmbient(float4 lightColor)
-            {
-                fixed4 ambientColor = _AmbientStrength * lightColor;
-                return ambientColor;
-            }
-
-            fixed4 computeDiffuse(float3 vertexPosition, half3 vertexNormal, float3 lightPosition, fixed4 lightColor)
-            {
-                half3 directionToLight = normalize(lightPosition - vertexPosition);
-                half diffuseCoef = saturate(dot(vertexNormal, directionToLight));
-
-                fixed4 diffuseColor = diffuseCoef * lightColor;
-
-                return diffuseColor;
-            }
-
-            fixed4 computeSpecular(half3 directionToCamera, half3 vertexNormal, half3 lightDirection, fixed4 lightColor)
-            {
-                half3 halfWayDir = normalize(directionToCamera + lightDirection);
-
-                half specularCoef = saturate(dot(vertexNormal, halfWayDir));
-                specularCoef = pow(specularCoef, _SpecularPow * 100.0);
-
-                fixed4 specularColor = _SpecularStrength * specularCoef * lightColor;
-
-                return specularColor;
-            }
-
-            fixed4 applyPhong(fixed4 baseColor, float3 vertexPosition, half3 vertexNormal, float3 lightPosition, half3 lightDirection, fixed4 lightColor)
-            {
-                half3 directionToCamera = normalize(_WorldSpaceCameraPos - vertexPosition); // Better results if computed in FRAGMENT
-
-                fixed4 ambientColor = computeAmbient(lightColor);
-                fixed4 diffuseColor = computeDiffuse(vertexPosition, vertexNormal, lightPosition, lightColor);
-                fixed4 specularColor = computeSpecular(directionToCamera, vertexNormal, lightDirection, lightColor);        
-
-                baseColor = ambientColor + (diffuseColor * baseColor) + specularColor;
-                baseColor.w = 1.0;
-
-                return baseColor;
-            }
-
 
 
             v2f vert (appdata v)
@@ -243,7 +158,9 @@ Shader "01_FXStack/Shader_01_FXStack_Phong"
 
                 fixed4 lightColor = _LightColor0 * attenuation;
 
-                baseColor = applyPhong(baseColor, i.worldPosition, i.worldNormal, _WorldSpaceLightPos0.xyz, lightDirection, lightColor);//_AmbientColor); 
+                half3 directionToCamera = normalize(_WorldSpaceCameraPos - i.worldPosition); // Better results if computed in FRAGMENT
+                baseColor = applyPhong(baseColor, i.worldPosition, i.worldNormal, directionToCamera, _WorldSpaceLightPos0.xyz, lightDirection, lightColor
+                , _AmbientStrength, _SpecularStrength, _SpecularPow);
                 
                 return baseColor;
             }

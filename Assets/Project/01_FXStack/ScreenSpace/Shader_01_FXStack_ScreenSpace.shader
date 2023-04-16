@@ -15,6 +15,7 @@ Shader "01_FXStack/Shader_01_FXStack_ScreenSpace"
             #pragma vertex vert
             #pragma fragment frag
             #include "UnityCG.cginc"
+            #include "../../MyShaderLibraries/MyUVFunctions.cginc"
 
             struct appdata
             {
@@ -30,21 +31,6 @@ Shader "01_FXStack/Shader_01_FXStack_ScreenSpace"
             sampler2D _MainTex;
             float4 _MainTex_ST;
 
-
-            float2 getScreenSpaceUV(float4 clipPosVertex)
-            {
-                // Clip space vertex to transpose coordinates
-                float4 screenPos = ComputeScreenPos(clipPosVertex);                
-
-                // Divide screen position xy by screen position w
-                float2 screenSpaceUV = screenPos.xy / screenPos.w;
-
-                // Divide screen params to get aspect ratio
-                float2 ratio = _ScreenParams.x / _ScreenParams.y;
-                screenSpaceUV.x *= ratio;
-                
-                return screenSpaceUV;
-            }
 
 
             v2f vert (appdata v)

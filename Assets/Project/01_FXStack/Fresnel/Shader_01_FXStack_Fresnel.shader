@@ -25,6 +25,9 @@ Shader "01_FXStack/Shader_01_FXStack_Fresnel"
             #pragma target 4.5            
             #include "UnityCG.cginc"
             #include "Lighting.cginc"
+            #include "../../MyShaderLibraries/MyLighting.cginc"
+            #include "../../MyShaderLibraries/MyFunctions.cginc"
+            #include "../../MyShaderLibraries/MyUVFunctions.cginc"
 
             struct appdata
             {
@@ -52,42 +55,6 @@ Shader "01_FXStack/Shader_01_FXStack_Fresnel"
             float _SpecularStrength, _SpecularPow;
 
 
-            float fresnel(half3 dirToCam, half3 worldSpaceVertexNormal, half exponent, half3 camForward)
-            {
-                float value = saturate(dot(worldSpaceVertexNormal, dirToCam));
-                //float value = saturate(dot(worldSpaceVertexNormal, -camForward));
-                value = 1.0 - value;
-                value = pow(value, exponent);
-                return value;
-            } 
-
-            float2 getScreenSpaceUV(float4 clipPosVertex)
-            {
-                // Clip space vertex to transpose coordinates
-                float4 screenPos = ComputeScreenPos(clipPosVertex);                
-
-                // Divide screen position xy by screen position w
-                float2 screenSpaceUV = screenPos.xy / screenPos.w;
-
-                // Divide screen params to get aspect ratio
-                float2 ratio = _ScreenParams.x / _ScreenParams.y;
-                screenSpaceUV.x *= ratio;
-                
-                return screenSpaceUV;
-            }
-
-
-            fixed4 computeSpecular(half3 directionToCamera, half3 vertexNormal, half3 lightDirection, fixed4 lightColor)
-            {
-                half3 halfWayDir = normalize(directionToCamera + lightDirection);
-
-                half specularCoef = saturate(dot(vertexNormal, halfWayDir));
-                specularCoef = pow(specularCoef, _SpecularPow * 100.0);
-
-                fixed4 specularColor = _SpecularStrength * specularCoef * lightColor;
-
-                return specularColor;
-            }
 
 
             v2f vert (appdata v)
@@ -122,9 +89,9 @@ Shader "01_FXStack/Shader_01_FXStack_Fresnel"
                 fixed4 col = tex2D(_MainTex, uv);
 
                 half3 directionToCamera = normalize(_WorldSpaceCameraPos - i.worldPosition);
-                col += computeSpecular(directionToCamera, i.worldNormal, _WorldSpaceLightPos0.xyz, _LightColor0);
+                col += computeSpecular(directionToCamera, i.worldNormal, _WorldSpaceLightPos0.xyz, _LightColor0, _SpecularStrength, _SpecularPow);
 
-                float interpolation = fresnel(i.dirToCam, i.worldNormal, _FresnelExponent, i.cameraForward);
+                float interpolation = fresnel(i.dirToCam, i.worldNormal, _FresnelExponent);
                 col.xyz = lerp(col.xyz, _OutlineColor.xyz, interpolation);
                 
                 return col;

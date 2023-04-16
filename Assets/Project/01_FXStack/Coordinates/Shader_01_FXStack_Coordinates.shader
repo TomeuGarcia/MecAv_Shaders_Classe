@@ -21,6 +21,7 @@ Shader "01_FXStack/Shader_01_FXStack_Coordinates"
             #define PI2 6.283185307179
 
             #include "UnityCG.cginc"
+            #include "../../MyShaderLibraries/MyUVFunctions.cginc"
 
             struct appdata
             {
@@ -38,20 +39,6 @@ Shader "01_FXStack/Shader_01_FXStack_Coordinates"
             float4 _MainTex_ST, _MainTex_B_ST;
             fixed _MaskAdd, _MaskPow;
 
-            float2 cartesianToPolar(float2 cartesianCoords)
-            {
-                float distance = length(cartesianCoords);
-                float angle = atan2(cartesianCoords.y, cartesianCoords.x);
-                return float2(angle / PI2, distance);
-            }
-
-            
-            float2 polarToCartesian(float2 polarCoords)
-            {
-                float2 cartesianCoords;
-                sincos(polarCoords.x * PI2, cartesianCoords.y, cartesianCoords.x);
-                return cartesianCoords * polarCoords.y;
-            }
 
 
             v2f vert (appdata v)
@@ -84,7 +71,7 @@ Shader "01_FXStack/Shader_01_FXStack_Coordinates"
                 mask = saturate(mask);
 
                 // Transform uv vortex texture to polar
-                uv_Vortex = cartesianToPolar(uv_Vortex);
+                uv_Vortex = cartesianToPolar(uv_Vortex, PI2);
 
 
                 // Apply effects on polar
@@ -94,7 +81,7 @@ Shader "01_FXStack/Shader_01_FXStack_Coordinates"
 
                 //return fixed4(mask, mask, mask, 1);
                 // Go back to Cartesian
-                uv_Vortex = polarToCartesian(uv_Vortex);               
+                uv_Vortex = polarToCartesian(uv_Vortex, PI2);               
                 uv_Vortex = min(uv_Vortex, uv_Panning);
 
                 //return fixed4(uv_Vortex, 0, 1);

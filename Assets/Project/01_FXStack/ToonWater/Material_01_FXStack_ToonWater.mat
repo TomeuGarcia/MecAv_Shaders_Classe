@@ -26,7 +26,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _FreqWave1: 1.17
+    - _FreqWave1: 3
     - _FreqWave2: 0.36
     - _HeightWave1: 0.2
     - _HeightWave2: 0.4
@@ -34,11 +34,11 @@ Material:
     - _TimeOffsetWave1: 1
     - _TimeOffsetWave2: 0
     - _WaterDepth: 0.4
-    - _WavLengthWave1: 2.57
-    - _WavLengthWave2: 1.65
+    - _WavLengthWave1: 1
+    - _WavLengthWave2: 1.22
     m_Colors:
     - _DirWave1: {r: 0.21, g: 0, b: 0.88, a: 0}
-    - _DirWave2: {r: 0.7, g: 0, b: 0.7, a: 0}
+    - _DirWave2: {r: 0.7, g: 0, b: 0.5, a: 0}
     - _FrothColor: {r: 0.514151, g: 0.9956044, b: 1, a: 1}
     - _WaterColor: {r: 0, g: 0, b: 1, a: 1}
   m_BuildTextureStacks: []
