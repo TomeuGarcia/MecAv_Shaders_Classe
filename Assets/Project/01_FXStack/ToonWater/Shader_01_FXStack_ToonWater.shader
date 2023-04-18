@@ -48,6 +48,8 @@ Shader "Unlit/Shader_01_FXStack_ToonWater"
                 float4 vertex : SV_POSITION;     
 
                 half waveT : TEXCOORD1;        
+                float4 screenPosition : TEXCOORD2;        
+                float3 worldPosition : TEXCOORD3;        
             };
 
 
@@ -64,12 +66,16 @@ Shader "Unlit/Shader_01_FXStack_ToonWater"
             fixed4 _WaterColor, _FrothColor;
             half _WaterDepth;
 
+            UNITY_DECLARE_DEPTH_TEXTURE(_CameraDepthTexture);            
+
+
 
             half getWave(half3 direction, float3 worldPosition, float time, float frequency, float waveLength)
             {   
                 float waveOffset = (direction.x * worldPosition.x) + (direction.y * worldPosition.y) + (direction.z * worldPosition.z);
                 return (sin((time * frequency) + (waveOffset * waveLength)) + 1.0) * 0.5;
             }            
+
 
             v2f vert (appdata v)
             {
@@ -91,6 +97,11 @@ Shader "Unlit/Shader_01_FXStack_ToonWater"
 
                 o.vertex = UnityWorldToClipPos(float4(worldPosition, 1));
                 o.uv = TRANSFORM_TEX(v.uv, _MainTex);
+
+                o.worldPosition = worldPosition;
+                o.screenPosition = ComputeScreenPos(o.vertex);
+                COMPUTE_EYEDEPTH(o.screenPosition.z);
+
                 return o;
             }
 
@@ -106,6 +117,15 @@ Shader "Unlit/Shader_01_FXStack_ToonWater"
                 //textureColor = lerp(_WaterColor, _FrothColor, floor(textureColor.x + 0.3));
 
                 textureColor *= lerp(_WaterDepth, 1.0, i.waveT);
+
+
+                // compute depth
+                float existingLinearDepth01 = LinearEyeDepth(SAMPLE_DEPTH_TEXTURE_PROJ(_CameraDepthTexture, UNITY_PROJ_COORD(i.screenPosition)));
+                float depthDifference = existingLinearDepth01 - i.screenPosition.w;
+
+                return fixed4(existingLinearDepth01, existingLinearDepth01, existingLinearDepth01, 1);
+                //return fixed4(depthDifference, depthDifference, depthDifference, 1);
+
 
                 return textureColor;
             }
