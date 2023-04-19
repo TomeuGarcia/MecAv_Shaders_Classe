@@ -20,15 +20,24 @@ Material:
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
+    - _FoamTex:
+        m_Texture: {fileID: 2800000, guid: c49e0541c3b0c494cb55c81516b0f808, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _MainTex:
         m_Texture: {fileID: 2800000, guid: dcc8e36278a43454e9e7203c8914acc2, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - _DepthDistance: 3.77
     - _DepthFactor: 8
+    - _DepthMethod: 1
     - _DepthPower: 9
-    - _DepthSpread: 0.1
+    - _DepthSharpness: 2.3
+    - _DepthSpread: 7.15
+    - _FoamDistance: 0.3
+    - _FoamSpread: 0.5
     - _FreqWave1: 3
     - _FreqWave2: 0.36
     - _HeightWave1: 0.2
@@ -36,12 +45,16 @@ Material:
     - _PanningSpeed: 0.02
     - _TimeOffsetWave1: 1
     - _TimeOffsetWave2: 0
-    - _WaterDepth: 0.4
+    - _WaterDepth: 1
     - _WavLengthWave1: 1
     - _WavLengthWave2: 1.22
     m_Colors:
     - _DirWave1: {r: 0.21, g: 0, b: 0.88, a: 0}
     - _DirWave2: {r: 0.7, g: 0, b: 0.5, a: 0}
-    - _FrothColor: {r: 0.514151, g: 0.9956044, b: 1, a: 1}
-    - _WaterColor: {r: 0, g: 0, b: 1, a: 1}
+    - _FoamColor: {r: 1, g: 1, b: 1, a: 1}
+    - _FrothColor: {r: 1, g: 1, b: 1, a: 1}
+    - _WaterColor: {r: 0.17986828, g: 0.55277073, b: 0.8113208, a: 1}
+    - _WaterDeepColor: {r: 0.17101282, g: 0.35375383, b: 0.5754717, a: 1}
+    - _WaterHorizonColor: {r: 0, g: 0.9596045, b: 1, a: 1}
+    - _WaterShallowColor: {r: 0.26366144, g: 0.52929425, b: 0.7075472, a: 1}
   m_BuildTextureStacks: []
