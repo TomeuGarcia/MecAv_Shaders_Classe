@@ -28,6 +28,7 @@ Material:
     m_Floats:
     - _DepthFactor: 8
     - _DepthPower: 9
+    - _DepthSpread: 0.1
     - _FreqWave1: 3
     - _FreqWave2: 0.36
     - _HeightWave1: 0.2

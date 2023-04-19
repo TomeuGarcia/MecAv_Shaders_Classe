@@ -21,6 +21,8 @@ Shader "Unlit/Shader_01_FXStack_ToonWater"
         _WaterColor("Water Color", Color) = (0.0, 0.0, 1.0, 1.0)
         _FrothColor("Water Color", Color) = (0.0, 0.0, 0.3, 1.0)
         _WaterDepth("Water Depth", Range(0, 1)) = 0.3
+
+        _DepthSpread("Depth Spread", Float) = 1
     }
     SubShader
     {
@@ -67,6 +69,7 @@ Shader "Unlit/Shader_01_FXStack_ToonWater"
             half _WaterDepth;
 
             UNITY_DECLARE_DEPTH_TEXTURE(_CameraDepthTexture);            
+            float _DepthSpread;
 
 
 
@@ -118,13 +121,15 @@ Shader "Unlit/Shader_01_FXStack_ToonWater"
 
                 textureColor *= lerp(_WaterDepth, 1.0, i.waveT);
 
-
+                //return fixed4(i.screenPosition.xy / i.screenPosition.w, 1, 1);
                 // compute depth
                 float existingLinearDepth01 = LinearEyeDepth(SAMPLE_DEPTH_TEXTURE_PROJ(_CameraDepthTexture, UNITY_PROJ_COORD(i.screenPosition)));
-                float depthDifference = existingLinearDepth01 - i.screenPosition.w;
-
-                return fixed4(existingLinearDepth01, existingLinearDepth01, existingLinearDepth01, 1);
-                //return fixed4(depthDifference, depthDifference, depthDifference, 1);
+                float depthDifference = existingLinearDepth01 - i.screenPosition.z;
+                depthDifference /= _DepthSpread;
+                depthDifference = saturate(depthDifference);
+                
+                //return fixed4(existingLinearDepth01, existingLinearDepth01, existingLinearDepth01, 1);
+                return fixed4(depthDifference, depthDifference, depthDifference, 1);
 
 
                 return textureColor;
