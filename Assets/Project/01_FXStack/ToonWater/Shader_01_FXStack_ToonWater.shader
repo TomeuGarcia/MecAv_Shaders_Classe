@@ -172,7 +172,9 @@ Shader "01_FXStack/Shader_01_FXStack_ToonWater"
                 float foamT = depthHeightFade(i.worldPosition, i.screenPosition, _WorldSpaceCameraPos, _FoamDistance, 2);
                 float foamMask = step(foamT, _FoamSpread);
 
-                return foamMask;
+                float foamTexture = tex2D(_FoamTex, uv * 5).x;
+
+                return saturate((1-foamT) - foamTexture);
 
                 outColor = lerp(outColor, _FoamColor, foamMask);
 
