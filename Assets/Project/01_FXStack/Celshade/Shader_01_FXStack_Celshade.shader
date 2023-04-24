@@ -10,6 +10,7 @@ Shader "01_FXStack/Shader_01_FXStack_Celshade"
 
         _RimThinness("Rim Light Thinness", Range(0.0, 1.0)) = 0.1
         _RimThreshold("Rim Light Threshold", Range(0.0, 4.0)) = 0.1
+        _RimColor("Rim Color", Color) = (1, 0, 0, 1)
 
         _OutlineWidth("Outline Width", Range(0.0, 2.0)) = 0.2
         _OutlineColor("Outline Color", Color) = (0, 0, 0, 1)
@@ -44,7 +45,7 @@ Shader "01_FXStack/Shader_01_FXStack_Celshade"
             };
 
             half _OutlineWidth;
-            half4 _OutlineColor;
+            fixed4 _OutlineColor;
             half _NormalVSOriginDisplacement;
 
 
@@ -110,6 +111,7 @@ Shader "01_FXStack/Shader_01_FXStack_Celshade"
             float _Brightness;
 
             float _RimThinness, _RimThreshold;
+            fixed4 _RimColor;
 
 
             float stepDiffuseLight(half3 worldNormal, half3 lightDirection, float lightStepsInverse)
@@ -148,7 +150,9 @@ Shader "01_FXStack/Shader_01_FXStack_Celshade"
                 float steppedLight = stepDiffuseLight(i.worldNormal, _WorldSpaceLightPos0.xyz, _LightStepsInverse) * _LightStepsStrength * _LightColor0;               
                 float rim = rimLight(i.worldNormal, i.worldPosition, _WorldSpaceLightPos0.xyz);
 
+                
                 textureColor *= steppedLight + _Brightness + rim;
+                textureColor = lerp(textureColor, _RimColor, rim);
 
                 return textureColor;
             }

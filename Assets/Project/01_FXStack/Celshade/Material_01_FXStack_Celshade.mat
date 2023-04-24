@@ -28,15 +28,16 @@ Material:
     m_Floats:
     - _Brightness: 0.3
     - _LightSteps: 0.386
-    - _LightStepsInverse: 0.3
-    - _LightStepsStrength: 1
+    - _LightStepsInverse: 0.43
+    - _LightStepsStrength: 1.28
     - _NormalVSOriginDisplacement: 0
     - _OutlineWidth: 0.03
     - _RimSpread: 2.3
     - _RimThinness: 0.45
-    - _RimThreshold: 1
+    - _RimThreshold: 0
     - _RimWidth: 0.241
     m_Colors:
     - _AmbientColor: {r: 0.49803922, g: 0.57803386, b: 0.6039216, a: 1}
     - _OutlineColor: {r: 0, g: 0.16237438, b: 0.20784314, a: 1}
+    - _RimColor: {r: 1, g: 0.96482694, b: 0, a: 1}
   m_BuildTextureStacks: []

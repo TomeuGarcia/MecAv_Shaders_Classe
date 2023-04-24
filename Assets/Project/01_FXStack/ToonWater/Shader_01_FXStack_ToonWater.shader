@@ -5,28 +5,30 @@ Shader "01_FXStack/Shader_01_FXStack_ToonWater"
         _MainTex ("Texture", 2D) = "white" {}
         _FoamTex ("Foam Texture", 2D) = "white" {}
         
+        // Wave 1
         _DirWave1 ("Direction Wave 1", Vector) = (0, 0, 1, 0)
         _FreqWave1 ("Frequency Wave 1", Range(0, 10)) = 1
         _WavLengthWave1 ("Wave Length Wave 1", Range(0, 10)) = 1
         _TimeOffsetWave1 ("Time Offset Wave 1", Range(0, 3)) = 0
         _HeightWave1 ("Height Wave 1", Range(0, 3)) = 0.5
 
+        // Wave 2
         _DirWave2 ("Direction Wave 2", Vector) = (1, 0, 0, 0)
         _FreqWave2 ("Frequency Wave 2", Range(0, 10)) = 1
         _WavLengthWave2 ("Wave Length Wave 2", Range(0, 10)) = 1
         _TimeOffsetWave2 ("Time Offset Wave 2", Range(0, 3)) = 0
         _HeightWave2 ("Height Wave 2", Range(0, 3)) = 0.5
 
-        _PanningSpeed("Panning Speed", Range(0, 1)) = 0.1
-
+        // Water
         _WaterShallowColor("Water Shallow Color", Color) = (0.0, 0.0, 1.0, 1.0)
         _WaterDeepColor("Water Deep Color", Color) = (0.0, 0.0, 1.0, 1.0)
-        _WaterHorizonColor("Water Horizon Color", Color) = (0.0, 0.0, 1.0, 1.0)
-        _FoamColor("Foam Color", Color) = (1.0, 1.0, 1.0, 1.0)
-        _WaterDepth("Water Depth", Range(0, 1)) = 0.3
-
+        _WaterHorizonColor("Water Horizon Color", Color) = (0.0, 0.0, 1.0, 1.0)        
         _DepthDistance("Depth Distance", Range(0, 10)) = 1
-        _DepthMethod("Depth Method", Range(0, 1)) = 1
+        _DepthMethod("Depth: Zbuf vs Ydiff", Range(0, 1)) = 1
+
+        // Foam
+        _FoamColor("Foam Color", Color) = (1.0, 1.0, 1.0, 1.0)
+        _FoamPanningSpeed("Foam Panning Speed", Range(0, 1)) = 0.1
         _FoamDistance("Foam Distance", Range(0, 10)) = 1
         _FoamSpread("Foam Spread", Range(0, 1)) = 0.1
     }
@@ -43,6 +45,7 @@ Shader "01_FXStack/Shader_01_FXStack_ToonWater"
 
             #include "UnityCG.cginc"
             #include "../../MyShaderLibraries/MyFunctions.cginc"
+            #include "../../MyShaderLibraries/MyLighting.cginc"
 
             struct appdata
             {
@@ -71,10 +74,9 @@ Shader "01_FXStack/Shader_01_FXStack_ToonWater"
             float _WavLengthWave1, _WavLengthWave2;
             float _TimeOffsetWave1, _TimeOffsetWave2;
             float _HeightWave1, _HeightWave2;
-            float _PanningSpeed;
+            float _FoamPanningSpeed;
 
             fixed4 _WaterShallowColor, _WaterDeepColor, _WaterHorizonColor, _FoamColor;
-            half _WaterDepth;
 
             UNITY_DECLARE_DEPTH_TEXTURE(_CameraDepthTexture);            
             float _DepthDistance, _DepthSharpness, _FoamDistance, _FoamSpread;
@@ -146,14 +148,13 @@ Shader "01_FXStack/Shader_01_FXStack_ToonWater"
             {               
                 // sample the texture
                 float2 uv = i.uv;
-                uv += normalize(_DirWave1.xz) * (_Time.y * _FreqWave1 * _PanningSpeed);
-                uv += normalize(_DirWave2.xz) * (_Time.y * _FreqWave2 * _PanningSpeed);
+                uv += normalize(_DirWave1.xz) * (_Time.y * _FreqWave1 * _FoamPanningSpeed);
+                uv += normalize(_DirWave2.xz) * (_Time.y * _FreqWave2 * _FoamPanningSpeed);
 
                 fixed4 textureColor = tex2D(_MainTex, uv);
                 //textureColor = lerp(_WaterColor, _FrothColor, textureColor.x);
                 //textureColor = lerp(_WaterColor, _FrothColor, floor(textureColor.x + 0.3));
 
-                //textureColor *= lerp(_WaterDepth, 1.0, i.waveT);
 
 
                 float depthF = depthFade(i.screenPosition, _DepthDistance);
@@ -164,23 +165,30 @@ Shader "01_FXStack/Shader_01_FXStack_ToonWater"
                 
                 //return fixed4(depth, depth, depth, 1);
                 fixed4 outColor = lerp(_WaterShallowColor, _WaterDeepColor, depth);
+                outColor *= lerp(0.3, 1.0, i.waveT);
 
                 half3 directionToCamera = normalize(_WorldSpaceCameraPos - i.worldPosition); 
                 float horizonT = fresnel(directionToCamera, i.worldNormal, 2.0);
                 outColor = lerp(outColor, _WaterHorizonColor, horizonT);
+
 
                 float foamT = depthHeightFade(i.worldPosition, i.screenPosition, _WorldSpaceCameraPos, _FoamDistance, 2);
                 float foamMask = step(foamT, _FoamSpread);
 
                 float foamTexture = tex2D(_FoamTex, uv * 5).x;
 
-                return saturate((1-foamT) - foamTexture);
+                foamMask = step(foamT, foamTexture);
+
+                //return saturate((1-foamT) - foamTexture);
 
                 outColor = lerp(outColor, _FoamColor, foamMask);
 
-                return outColor;
+                // Specular
+                half3 lightDirection = _WorldSpaceLightPos0.xyz;
+                fixed4 lightColor = fixed4(1,1,1,1);
+                outColor += computeSpecular(directionToCamera, i.worldNormal, lightDirection, lightColor, 0.3, 2);
 
-                return textureColor;
+                return outColor;
 
             }
 
