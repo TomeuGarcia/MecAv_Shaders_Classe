@@ -4,6 +4,7 @@ Shader "01_FXStack/Shader_01_FXStack_ToonWater"
     {
         _MainTex ("Texture", 2D) = "white" {}
         _FoamTex ("Foam Texture", 2D) = "white" {}
+        _DepthRampTex ("Depth Ramp Texture", 2D) = "white" {}
         
         // Wave 1
         _DirWave1 ("Direction Wave 1", Vector) = (0, 0, 1, 0)
@@ -63,10 +64,11 @@ Shader "01_FXStack/Shader_01_FXStack_ToonWater"
                 float3 worldPosition : TEXCOORD2;        
                 float4 screenPosition : TEXCOORD3;    
                 half3 worldNormal : TEXCOORD4;    
+                float3 wavelessWorldPosition : TEXCOORD5;        
             };
 
 
-            sampler2D _MainTex, _FoamTex;
+            sampler2D _MainTex, _FoamTex, _DepthRampTex;
             float4 _MainTex_ST;
 
             half4  _DirWave1, _DirWave2;
@@ -130,6 +132,7 @@ Shader "01_FXStack/Shader_01_FXStack_ToonWater"
                 wave1 *= _HeightWave1;
                 wave2 *= _HeightWave2;
                     
+                o.wavelessWorldPosition = worldPosition;
                 worldPosition += worldNormal * (wave1 + wave2);
 
 
@@ -164,7 +167,10 @@ Shader "01_FXStack/Shader_01_FXStack_ToonWater"
                 
                 
                 //return fixed4(depth, depth, depth, 1);
-                fixed4 outColor = lerp(_WaterShallowColor, _WaterDeepColor, depth);
+                float2 depthRampUV = min(depth, 0.9);
+                half depthRampT = tex2D(_DepthRampTex, depthRampUV);                
+                //depthRampT = depth;
+                fixed4 outColor = lerp(_WaterShallowColor, _WaterDeepColor, depthRampT);
                 outColor *= lerp(0.3, 1.0, i.waveT);
 
                 half3 directionToCamera = normalize(_WorldSpaceCameraPos - i.worldPosition); 
@@ -172,7 +178,7 @@ Shader "01_FXStack/Shader_01_FXStack_ToonWater"
                 outColor = lerp(outColor, _WaterHorizonColor, horizonT);
 
 
-                float foamT = depthHeightFade(i.worldPosition, i.screenPosition, _WorldSpaceCameraPos, _FoamDistance, 2);
+                float foamT = depthHeightFade(i.wavelessWorldPosition, i.screenPosition, _WorldSpaceCameraPos, _FoamDistance, 2);
                 float foamMask = step(foamT, _FoamSpread);
 
                 float foamTexture = tex2D(_FoamTex, uv * 5).x;

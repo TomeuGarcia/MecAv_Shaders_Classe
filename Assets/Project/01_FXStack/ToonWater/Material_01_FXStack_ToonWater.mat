@@ -20,6 +20,10 @@ Material:
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
+    - _DepthRampTex:
+        m_Texture: {fileID: 2800000, guid: faf41b263b3254f4cb5a9cdc7bef14fb, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _FoamTex:
         m_Texture: {fileID: 2800000, guid: 47d01a2bb74096f449c8c92ca9b1a3a0, type: 3}
         m_Scale: {x: 1, y: 1}
