@@ -64,3 +64,30 @@ fixed4 getSeamlessTriplanarColor(float3 worldPosition, half3 worldNormal, sample
 
     return color_up + color_right + color_forward;
 }
+
+
+
+half3 filterNormal(sampler2D heightMap, float4 uv, float texelSize, fixed texelDist, fixed maxHeight)
+{
+    float4 h;
+    h.x = tex2Dlod(heightMap, uv + float4(texelSize * float2(0, -1 * texelDist), 0, 0)).x * maxHeight;
+    h.y = tex2Dlod(heightMap, uv + float4(texelSize * float2(-1 * texelDist, 0), 0, 0)).x * maxHeight;
+    h.z = tex2Dlod(heightMap, uv + float4(texelSize * float2(1 * texelDist, 0), 0, 0)).x * maxHeight;
+    h.w = tex2Dlod(heightMap, uv + float4(texelSize * float2(0, 1 * texelDist), 0, 0)).x * maxHeight;
+
+    float3 n;
+    n.z = h.w - h.x;
+    n.x = h.z - h.y;
+    n.y = 2;
+    return normalize(n);
+
+    n.z = 2;
+    n.x = h.z - h.y;
+    n.y = h.w - h.x;
+    //return normalize(n);
+
+    n.z = 2;
+    n.x = h.y - h.z;
+    n.y = h.w - h.x;
+    return normalize(n);
+}

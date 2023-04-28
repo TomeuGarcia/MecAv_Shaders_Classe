@@ -38,7 +38,6 @@ Shader "01_FXStack/Shader_01_FXStack_ToonWater"
         _SpecularPow("Specular Pow", Float) = 2.0
 
         // Normals recomputation
-        _NormalTexelSize("Normal Texel Size", Range(0.001, 1)) = 0.001
         _NormalTexelDist("Normal Texel Dist", Range(0, 500)) = 100
 
     }
@@ -96,7 +95,7 @@ Shader "01_FXStack/Shader_01_FXStack_ToonWater"
 
             float _SpecularStrength, _SpecularPow;
 
-            float _NormalTexelSize, _NormalTexelDist;
+            float _NormalTexelDist;
 
 
             half getWave(half3 direction, float3 worldPosition, float time, float frequency, float waveLength)
@@ -129,29 +128,18 @@ Shader "01_FXStack/Shader_01_FXStack_ToonWater"
                 return depthFade;   
             }
 
-            half3 filterNormal(half3 direction, float3 worldPosition, float time, float frequency, float waveLength, float texelSize, fixed texelDist, fixed maxHeight)
+            half3 filterNormal(half3 direction, float3 worldPosition, float time, float frequency, float waveLength, float texelDist, fixed maxHeight)
             {
                 float4 h;
-                h.x = getWave(direction, worldPosition + float3(0, 0, -texelSize * texelDist), time, frequency, waveLength) * maxHeight;
-                h.y = getWave(direction, worldPosition + float3(-texelSize * texelDist, 0, 0), time, frequency, waveLength) * maxHeight;
-                h.z = getWave(direction, worldPosition + float3(texelSize * texelDist, 0, 0), time, frequency, waveLength) * maxHeight;
-                h.w = getWave(direction, worldPosition + float3(0, 0, texelSize * texelDist), time, frequency, waveLength) * maxHeight;
+                h.x = getWave(direction, worldPosition + float3(0, 0, -texelDist), time, frequency, waveLength) * maxHeight;
+                h.y = getWave(direction, worldPosition + float3(-texelDist, 0, 0), time, frequency, waveLength) * maxHeight;
+                h.z = getWave(direction, worldPosition + float3(texelDist, 0, 0), time, frequency, waveLength) * maxHeight;
+                h.w = getWave(direction, worldPosition + float3(0, 0, texelDist), time, frequency, waveLength) * maxHeight;
 
-                float3 n;
-                
+                float3 n;               
                 n.z = h.w - h.x;
                 n.x = h.z - h.y;
                 n.y = 2;
-                return normalize(n);
-                                
-                n.z = 2;
-                n.x = h.z - h.y;
-                n.y = h.w - h.x;                              
-                //return normalize(n);
-
-                n.z = 2;
-                n.x = h.y - h.z;
-                n.y = h.w - h.x;                              
                 return normalize(n);
             }
 
@@ -166,12 +154,12 @@ Shader "01_FXStack/Shader_01_FXStack_ToonWater"
                 half3 dirWave1 = normalize(_DirWave1.xyz);
                 half wave1 = getWave(dirWave1, worldPosition, _Time.y + _TimeOffsetWave1, _FreqWave1, _WavLengthWave1);
                 half3 wave1Normal = filterNormal(dirWave1, worldPosition, _Time.y + _TimeOffsetWave1, _FreqWave1, _WavLengthWave1, 
-                                                _NormalTexelSize, _NormalTexelDist, _HeightWave1);
+                                                _NormalTexelDist, _HeightWave1);
 
                 half3 dirWave2 = normalize(_DirWave2.xyz);
                 half wave2 = getWave(normalize(_DirWave2.xyz), worldPosition, _Time.y + _TimeOffsetWave2, _FreqWave2, _WavLengthWave2); 
                 half3 wave2Normal = filterNormal(dirWave2, worldPosition, _Time.y + _TimeOffsetWave2, _FreqWave2, _WavLengthWave2, 
-                                                _NormalTexelSize, _NormalTexelDist, _HeightWave2);               
+                                                _NormalTexelDist, _HeightWave2);               
 
                 o.waveT = (wave1 + wave2) / 2.0;
 
@@ -188,7 +176,6 @@ Shader "01_FXStack/Shader_01_FXStack_ToonWater"
                 o.worldPosition = worldPosition;
                 o.screenPosition = ComputeScreenPos(o.vertex);
                 //o.worldNormal = worldNormal;
-                //half3 noiseNormal = tex2Dlod(heightMap, uv + float4(texelSize * float2(0, -1 * texelDist), 0, 0)).x * maxHeight;
                 o.worldNormal = normalize(wave1Normal + wave2Normal);
 
                 COMPUTE_EYEDEPTH(o.screenPosition.z);
@@ -220,7 +207,6 @@ Shader "01_FXStack/Shader_01_FXStack_ToonWater"
                 half depthRampT = tex2D(_DepthRampTex, depthRampUV);                
                 //depthRampT = depth;
                 fixed4 outColor = lerp(_WaterShallowColor, _WaterDeepColor, depthRampT);
-                outColor *= lerp(0.3, 1.0, i.waveT);
 
                 half3 directionToCamera = normalize(_WorldSpaceCameraPos - i.worldPosition); 
                 float horizonT = fresnel(directionToCamera, i.worldNormal, 2.0);

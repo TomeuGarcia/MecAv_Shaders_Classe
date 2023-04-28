@@ -1,8 +1,13 @@
-Shader "01_FXStack/Shader_01_FXStack_Displacement"
+Shader "01_FXStack/Shader_01_FXStack_TriplanarDisplacement"
 {
     Properties
     {
         _MainTex ("Texture", 2D) = "white" {}
+        
+        _SidesTex ("Sides Texture", 2D) = "white" {}
+        _TopTex ("Top Texture", 2D) = "white" {}
+        _TriplanarFalloff("Triplanar Falloff", Range(0.01, 16.0)) = 1.0
+
         _HeightMapTex ("Height Map Texture", 2D) = "white" {}
         _MaxHeight ("Displacement Max Height", Range(0.0, 10.0)) = 1.0
 
@@ -55,6 +60,8 @@ Shader "01_FXStack/Shader_01_FXStack_Displacement"
             fixed4 _ColorTop, _ColorBottom;
             half _XZdirection;
 
+            sampler2D _SidesTex, _TopTex;
+            fixed _TriplanarFalloff;
 
 
             v2f vert (appdata v)
@@ -86,6 +93,9 @@ Shader "01_FXStack/Shader_01_FXStack_Displacement"
             {
                 // sample the texture
                 fixed4 col  = lerp(_ColorBottom, _ColorTop, i.displacement);
+
+                fixed4 triplanarColor = getSeamlessTriplanarColor(i.worldPosition, i.worldNormal, _TopTex, _SidesTex, _SidesTex, _TriplanarFalloff);
+                return triplanarColor;
 
                 half t = saturate(dot(i.worldNormal, half3(0,1,0)));
                 col = lerp(_ColorBottom, _ColorTop, t);

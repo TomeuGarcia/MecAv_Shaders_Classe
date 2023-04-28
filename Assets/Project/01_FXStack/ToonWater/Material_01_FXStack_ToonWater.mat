@@ -47,7 +47,7 @@ Material:
     - _FreqWave2: 0.36
     - _HeightWave1: 0.23
     - _HeightWave2: 0.4
-    - _NormalTexelDist: 300
+    - _NormalTexelDist: 500
     - _NormalTexelSize: 0.001
     - _PanningSpeed: 0.02
     - _SpecularPow: 1
