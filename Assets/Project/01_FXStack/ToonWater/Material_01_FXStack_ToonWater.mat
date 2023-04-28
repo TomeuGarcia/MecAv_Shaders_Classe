@@ -34,7 +34,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _DepthDistance: 3.77
+    - _DepthDistance: 2.5
     - _DepthFactor: 8
     - _DepthMethod: 1
     - _DepthPower: 9
@@ -47,7 +47,11 @@ Material:
     - _FreqWave2: 0.36
     - _HeightWave1: 0.23
     - _HeightWave2: 0.4
+    - _NormalTexelDist: 300
+    - _NormalTexelSize: 0.001
     - _PanningSpeed: 0.02
+    - _SpecularPow: 1
+    - _SpecularStrength: 1
     - _TimeOffsetWave1: 1
     - _TimeOffsetWave2: 0
     - _WaterDepth: 1
