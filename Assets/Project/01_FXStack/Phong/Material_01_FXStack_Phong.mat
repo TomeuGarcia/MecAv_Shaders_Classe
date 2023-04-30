@@ -31,5 +31,5 @@ Material:
     - _SpecularPow: 1
     - _SpecularStrength: 1
     m_Colors:
-    - _AmbientColor: {r: 0.96439445, g: 0.8160377, b: 1, a: 1}
+    - _AmbientColor: {r: 0.9716981, g: 0.6004361, b: 0.86428475, a: 1}
   m_BuildTextureStacks: []
