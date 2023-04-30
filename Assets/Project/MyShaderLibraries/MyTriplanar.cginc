@@ -80,14 +80,4 @@ half3 filterNormal(sampler2D heightMap, float4 uv, float texelSize, fixed texelD
     n.x = h.z - h.y;
     n.y = 2;
     return normalize(n);
-
-    n.z = 2;
-    n.x = h.z - h.y;
-    n.y = h.w - h.x;
-    //return normalize(n);
-
-    n.z = 2;
-    n.x = h.y - h.z;
-    n.y = h.w - h.x;
-    return normalize(n);
 }

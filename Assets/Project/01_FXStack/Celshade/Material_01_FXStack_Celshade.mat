@@ -28,12 +28,12 @@ Material:
     m_Floats:
     - _Brightness: 0.3
     - _LightSteps: 0.386
-    - _LightStepsInverse: 0.43
+    - _LightStepsInverse: 0.352
     - _LightStepsStrength: 1.28
     - _NormalVSOriginDisplacement: 0
-    - _OutlineWidth: 0.03
+    - _OutlineWidth: 0.04
     - _RimSpread: 2.3
-    - _RimThinness: 0.45
+    - _RimThinness: 0.335
     - _RimThreshold: 0
     - _RimWidth: 0.241
     m_Colors:

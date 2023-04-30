@@ -27,7 +27,7 @@ Material:
     m_Ints: []
     m_Floats:
     - _FresnelExponent: 1.3
-    - _SpecularPow: 0.025
+    - _SpecularPow: 0.013
     - _SpecularStrength: 1
     m_Colors:
     - _OutlineColor: {r: 1, g: 0, b: 0.9181361, a: 1}
