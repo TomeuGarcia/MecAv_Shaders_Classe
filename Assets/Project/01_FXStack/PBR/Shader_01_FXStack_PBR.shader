@@ -7,10 +7,10 @@ Shader "01_FXStack/Shader_01_FXStack_PBR"
         _NormalTex ("Normal Texture", 2D) = "bump" {}
         _NormalValue ("Normal multiplier", Range(0, 10)) = 1
 
-        _SmoothnessTex ("Smoothness Tex",2D) = "white" {}
+        _SmoothnessTex ("Smoothness Tex",2D) = "black" {}
         _SmoothnessValue ("Smoothness multiplier", Range(0, 10)) = 1
 
-        _MetallicTex ("Metallic Tex",2D) = "white" {}
+        _MetallicTex ("Metallic Tex",2D) = "black" {}
         _MetallicValue ("Metallic multiplier", Range(0, 10)) = 1
 
         _Anisotropy("Anisotropy", Range(0, 1)) = 0
@@ -144,44 +144,44 @@ Shader "01_FXStack/Shader_01_FXStack_PBR"
                 // sample the texture
                 fixed4 albedo = tex2D(_MainTex, i.uv);
 
+                // normal and tangent calc
                 half3 normalWS = normalize(i.normalWS);
                 half3 normalTS = UnpackNormal(tex2D(_NormalTex, i.uv));
-
                 float3x3 tangentToWorld = CreateTangentToWorld(normalWS, i.tangentWS.xyz, i.tangentWS.w);
                 normalWS = TransformTangentToWorld(normalTS, tangentToWorld);
 
-
-                // Directions
-                half3 viewDir = normalize(i.positionWS - _WorldSpaceCameraPos);
-                half3 lightDir = normalize(_WorldSpaceLightPos0);
-                half3 halfDir = normalize(viewDir + lightDir);
-
-                // Dots
-                float NdotL = max(0.0, dot(normalWS, lightDir));
-                float NdotH = max(0.0, dot(normalWS, halfDir));
-                float NdotV = max(0.0, dot(normalWS, viewDir));
-                float HdotT = max(0.0, dot(halfDir, i.tangentWS.xyz));
-                float HdotB = max(0.0, dot(halfDir, i.bitangentWS));
-
-                // Sample PBR textures
-                float smoothness = tex2D(_SmoothnessTex, i.uv).r * _SmoothnessValue;
-                float metalness = tex2D(_MetallicTex, i.uv).r * _MetallicValue;
+                // calculate additional vectors
+                float3 viewDir = normalize(i.positionWS - _WorldSpaceCameraPos);
+                float3 lightDir = normalize(_WorldSpaceLightPos0);
+                float3 halfDir = normalize(viewDir + lightDir);
                 
-                // Distributions
-                float3 F0 = lerp(float3(0.04, 0.04, 0.04), albedo, metalness);
+                // dots
+                float NdotL = max(0.0, dot(normalWS, lightDir));
+                float NdotH = max(0.0, dot(halfDir, normalWS));
+                float NdotV = max(0.0, dot(normalWS, viewDir));
+                float HdotT = dot(halfDir, i.tangentWS.xyz);
+                float HdotB = dot(halfDir, i.bitangentWS);
+
+                // sampler PBR textures
+                float smoothness = saturate(min(1 - _SmoothnessValue, 1 - tex2D(_SmoothnessTex, i.uv)).r);
+                float metallic = saturate(max(_MetallicValue, tex2D(_MetallicTex, i.uv)).r);
+
+                // distributions
+                float3 F0 = lerp(float3(0.04, 0.04, 0.04), albedo, metallic);
+ 
                 float D = trowbridgeReitzNDF(NdotH, smoothness);
                 D = trowbridgeReitzAnisotropicNDF(NdotH, smoothness, _Anisotropy, HdotT, HdotB);
                 float3 F = fresnel(F0, NdotV, smoothness);
                 float G = schlickBeckmannGAF(NdotV, smoothness) * schlickBeckmannGAF(NdotL, smoothness);
 
-                fixed4 color = float4(0,0,0,1);
-                fixed3 lightValue = max(0.0, dot(normalWS, _WorldSpaceLightPos0)) * _LightColor0.xyz;
+                fixed3 lightValue = max(0.0, dot(normalWS, lightDir)) * _LightColor0.rgb;
                 lightValue += _Ambient;
 
-                float3 diffuse = albedo * (1-F) * (1-metalness);
+                float3 diffuse = albedo * (1 - F) * (1 - metallic);
                 float3 specular = G * D * F / (4 * NdotV * NdotL);
 
-                color.rgb = saturate(diffuse + saturate(specular)) * lightValue;
+                fixed4 color = float4(0, 0, 0, 1);
+                color.rgb = float4(saturate((diffuse + saturate(specular)) * lightValue), 1);
 
                 return color;
             }
