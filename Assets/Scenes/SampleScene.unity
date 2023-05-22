@@ -4793,6 +4793,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5d246a04b7ebe24499e2ad84a36af917, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  rimLightColor: {r: 1, g: 1, b: 1, a: 1}
+  blurSize: 100
+  shader: {fileID: 4800000, guid: 7c13d6d77d3ff3d4d8f95eebc351847e, type: 3}
+  renderers:
+  - {fileID: 472735085}
+  - {fileID: 1284774657}
+  - {fileID: 1181741956}
+  - {fileID: 973922429}
+  targetCamera: {fileID: 0}
   cameraEvent: 11
   material: {fileID: 2100000, guid: abc0184325d18e54f93eecf617f44897, type: 2}
 --- !u!1001 &973922427
@@ -4859,6 +4868,11 @@ PrefabInstance:
 --- !u!4 &973922428 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 151fed28f5bc307469f278fd1c8bbac2, type: 3}
+  m_PrefabInstance: {fileID: 973922427}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &973922429 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: -7511558181221131132, guid: 151fed28f5bc307469f278fd1c8bbac2, type: 3}
   m_PrefabInstance: {fileID: 973922427}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &982431175

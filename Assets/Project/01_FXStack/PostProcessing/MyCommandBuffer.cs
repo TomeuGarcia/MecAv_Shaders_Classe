@@ -3,71 +3,184 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Experimental.Rendering;
+using UnityEngine.Serialization;
+
+#if UNITY_EDITOR
 using UnityEditor;
+#endif
 
 [ExecuteInEditMode]
 public class MyCommandBuffer : MonoBehaviour
 {
-    [SerializeField] private CameraEvent cameraEvent = CameraEvent.AfterForwardOpaque;
+    [SerializeField, ColorUsageAttribute(true, true)] private Color rimLightColor = Color.white;
+    [SerializeField, FormerlySerializedAs("BlurSize"), Tooltip("Default size = 48"), Range(0f, 1000f)] private float blurSize = 4f;
+
+    [SerializeField] private Shader shader;
+
+    [SerializeField] private Renderer[] renderers;
+    private const string SHADER_NAME = "01_FXStack/Shader_01_FXStack_PostProcessing";
+
+    // shader pass indices
+    private const int SHADER_PASS_MASK = 0;
+    private const int SHADER_PASS_BLUR = 1;
+
+    // render pass texture IDs
+    private int maskBuffer = Shader.PropertyToID("_Mask");
+    private int glowBuffer = Shader.PropertyToID("_Glow");
+    private int blurSizeID = Shader.PropertyToID("_BlurSize");
+
+
 
     private int bufferPrePass_PropertyID = Shader.PropertyToID("_PrePass");
     private int bufferAfterPass_PropertyID = Shader.PropertyToID("_AfterPass");
 
     private CommandBuffer commandBuffer;
-    private Camera targetCamera;
-    [SerializeField] Material material;
+    [SerializeField] private Camera targetCamera;
+    [SerializeField] private CameraEvent cameraEvent = CameraEvent.AfterForwardOpaque;
+    [SerializeField] private Material material;
 
 
+
+# if UNITY_EDITOR
     void OnValidate()
     {
-        Create_CommandBuffer_Camera_Material();
-        Debug.Log("TEST PRINT");
+        if (shader == null)
+        {
+            shader = Shader.Find(SHADER_NAME);
+        }
+    }
+#endif
+
+    private void OnEnable()
+    {
+        Camera.onPreRender += ApplyCommandBuffer;
+        Camera.onPostRender += RemoveCommandBuffer;
+    }
+    private void OnDisable()
+    {
+        Camera.onPreRender -= ApplyCommandBuffer;
+        Camera.onPostRender -= RemoveCommandBuffer;
     }
 
 
-    private void Create_CommandBuffer_Camera_Material()
+    private Mesh MeshFromRenderer(Renderer renderer)
     {
+        if (renderer is MeshRenderer)
+        {
+            return renderer.GetComponent<MeshFilter>().sharedMesh;
+        }
+
+        return null;
+    }
+
+    private void CreateCommandBuffer(Camera cam)
+    {
+        if (renderers == null || renderers.Length == 0)
+            return;
+
         if (commandBuffer == null)
         {
-            commandBuffer = new CommandBuffer();
-            commandBuffer.name = "MyCommandBuffer";
+            commandBuffer = new UnityEngine.Rendering.CommandBuffer();
+            commandBuffer.name = "MyCommandBuffer: " + gameObject.name;
         }
         else
         {
             commandBuffer.Clear();
         }
 
-        if (targetCamera == null)
-        {
-            targetCamera = Camera.main;
-            targetCamera.AddCommandBuffer(cameraEvent, commandBuffer);
-        }
-
         if (material == null)
         {
-            material = new Material(Shader.Find("01_FXStack/Shader_01_FXStack_PostProcessing"));
+            material = new Material(shader != null ? shader : Shader.Find(SHADER_NAME));
         }
 
-        RenderTextureDescriptor renderTextureDescriptor = new RenderTextureDescriptor
+        // do nothing if no rimlight will be visible
+        if (rimLightColor.a <= (1f / 255f) || blurSize <= 0f)
         {
-            height = 1080,
-            width = 1920,
-            msaaSamples = 0,
-            graphicsFormat = GraphicsFormat.R16G16B16_SFloat,
+            commandBuffer.Clear();
+            return;
+        }
+
+        // support meshes with sub meshes
+        // can be from having multiple materials, complex skinning rigs, or a lot of vertices
+        int renderersCount = renderers.Length;
+        int[] subMeshCount = new int[renderersCount];
+
+        for (int i = 0; i < renderersCount; i++)
+        {
+            var mesh = MeshFromRenderer(renderers[i]);
+
+            if (mesh != null)
+            {
+                // assume staticly batched meshes only have one sub mesh
+                if (renderers[i].isPartOfStaticBatch)
+                    subMeshCount[i] = 1; // hack hack hack
+                else
+                    subMeshCount[i] = mesh.subMeshCount;
+            }
+        }
+
+        // match current quality settings' MSAA settings
+        // doesn't check if current camera has MSAA enabled
+        // also could just always do MSAA if you so pleased
+        int msaa = 1;
+
+        int width = cam.scaledPixelWidth;
+        int height = cam.scaledPixelHeight;
+
+
+        // setup descriptor for descriptor of inverted alpha render texture
+        RenderTextureDescriptor MaskRTD = new RenderTextureDescriptor()
+        {
             dimension = TextureDimension.Tex2D,
-            useMipMap = false
+            graphicsFormat = GraphicsFormat.A10R10G10B10_XRUNormPack32,
+
+            width = width,
+            height = height,
+
+            msaaSamples = msaa,
+            depthBufferBits = 0,
+
+            sRGB = false,
+
+            useMipMap = true,
+            autoGenerateMips = true
         };
 
-        commandBuffer.GetTemporaryRT(bufferPrePass_PropertyID, renderTextureDescriptor, FilterMode.Bilinear);
-        commandBuffer.Blit(bufferPrePass_PropertyID, BuiltinRenderTextureType.CameraTarget, material);
+        commandBuffer.GetTemporaryRT(maskBuffer, MaskRTD, FilterMode.Trilinear);
+
+        // render meshes to main buffer for the interior stencil mask
+        commandBuffer.SetRenderTarget(maskBuffer);
+        commandBuffer.ClearRenderTarget(true, true, Color.clear);
+        for (int rendererI = 0; rendererI < renderersCount; ++rendererI)
+        {
+            for (int subMeshI = 0; subMeshI < subMeshCount[rendererI]; ++subMeshI)
+            {
+                commandBuffer.DrawRenderer(renderers[rendererI], material, subMeshI, SHADER_PASS_MASK);
+
+            }
+        }
+
+        commandBuffer.SetRenderTarget(BuiltinRenderTextureType.CameraTarget);
 
     }
-    
-    
 
-
-    void Update()
+    private void ApplyCommandBuffer(Camera cam)
     {
-        
+        CreateCommandBuffer(cam);
+        if (commandBuffer == null) return;
+
+        targetCamera = cam;
+        targetCamera.AddCommandBuffer(cameraEvent, commandBuffer);
     }
+    private void RemoveCommandBuffer(Camera cam)
+    {
+        if (targetCamera != null && commandBuffer != null)
+        {
+            targetCamera.RemoveCommandBuffer(cameraEvent, commandBuffer);
+            targetCamera = null;
+        }
+    }
+
+
+
 }
