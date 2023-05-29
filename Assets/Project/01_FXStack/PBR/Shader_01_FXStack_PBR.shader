@@ -5,7 +5,7 @@ Shader "01_FXStack/Shader_01_FXStack_PBR"
         _MainTex ("Texture", 2D) = "white" {}
 
         _NormalTex ("Normal Texture", 2D) = "bump" {}
-        _NormalValue ("Normal multiplier", Range(0, 10)) = 1
+        _NormalValue ("Normal multiplier", Range(0, 1)) = 1
 
         _SmoothnessTex ("Smoothness Tex",2D) = "black" {}
         _SmoothnessValue ("Smoothness multiplier", Range(0, 10)) = 1
@@ -148,7 +148,7 @@ Shader "01_FXStack/Shader_01_FXStack_PBR"
                 half3 normalWS = normalize(i.normalWS);
                 half3 normalTS = UnpackNormal(tex2D(_NormalTex, i.uv));
                 float3x3 tangentToWorld = CreateTangentToWorld(normalWS, i.tangentWS.xyz, i.tangentWS.w);
-                normalWS = TransformTangentToWorld(normalTS, tangentToWorld);
+                normalWS = TransformTangentToWorld(normalTS, tangentToWorld);                
 
                 // calculate additional vectors
                 float3 viewDir = normalize(i.positionWS - _WorldSpaceCameraPos);

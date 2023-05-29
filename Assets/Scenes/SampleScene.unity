@@ -1958,7 +1958,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 0963706fea031c640851f643c8c22f90, type: 2}
+  - {fileID: 2100000, guid: abc0184325d18e54f93eecf617f44897, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -4755,7 +4755,7 @@ Camera:
   m_CullingMask:
     serializedVersion: 2
     m_Bits: 4294967295
-  m_RenderingPath: 3
+  m_RenderingPath: 1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
   m_TargetEye: 3
@@ -4793,15 +4793,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5d246a04b7ebe24499e2ad84a36af917, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rimLightColor: {r: 1, g: 1, b: 1, a: 1}
-  blurSize: 100
+  rimLightColor: {r: 0.012736797, g: 0, b: 1, a: 1}
+  blurSize: 63
+  blurSharpness: 1.8
+  minLevel: 1
   shader: {fileID: 4800000, guid: 7c13d6d77d3ff3d4d8f95eebc351847e, type: 3}
   renderers:
   - {fileID: 472735085}
   - {fileID: 1284774657}
   - {fileID: 1181741956}
   - {fileID: 973922429}
-  targetCamera: {fileID: 0}
   cameraEvent: 11
   material: {fileID: 2100000, guid: abc0184325d18e54f93eecf617f44897, type: 2}
 --- !u!1001 &973922427
@@ -4858,7 +4859,7 @@ PrefabInstance:
     - target: {fileID: -7511558181221131132, guid: 151fed28f5bc307469f278fd1c8bbac2, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: 0963706fea031c640851f643c8c22f90, type: 2}
+      objectReference: {fileID: 2100000, guid: abc0184325d18e54f93eecf617f44897, type: 2}
     - target: {fileID: 919132149155446097, guid: 151fed28f5bc307469f278fd1c8bbac2, type: 3}
       propertyPath: m_Name
       value: Monkey
@@ -6234,7 +6235,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 0963706fea031c640851f643c8c22f90, type: 2}
+  - {fileID: 2100000, guid: abc0184325d18e54f93eecf617f44897, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -6633,7 +6634,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 0963706fea031c640851f643c8c22f90, type: 2}
+  - {fileID: 2100000, guid: abc0184325d18e54f93eecf617f44897, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

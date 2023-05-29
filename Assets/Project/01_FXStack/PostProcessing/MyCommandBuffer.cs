@@ -14,6 +14,8 @@ public class MyCommandBuffer : MonoBehaviour
 {
     [SerializeField, ColorUsageAttribute(true, true)] private Color rimLightColor = Color.white;
     [SerializeField, FormerlySerializedAs("BlurSize"), Tooltip("Default size = 48"), Range(0f, 1000f)] private float blurSize = 4f;
+    [SerializeField, Range(1f, 10f)] private float blurSharpness = 4f;
+    [SerializeField, Range(1, 6)] private int minLevel = 1;
 
     [SerializeField] private Shader shader;
 
@@ -23,22 +25,23 @@ public class MyCommandBuffer : MonoBehaviour
     // shader pass indices
     private const int SHADER_PASS_MASK = 0;
     private const int SHADER_PASS_BLUR = 1;
+    private const int SHADER_PASS_ADDITIVE = 2;
 
     // render pass texture IDs
     private int maskBuffer = Shader.PropertyToID("_Mask");
     private int glowBuffer = Shader.PropertyToID("_Glow");
-    private int blurSizeID = Shader.PropertyToID("_BlurSize");
-
+    private int mainBuffer = Shader.PropertyToID("_Main");
+    
 
 
     private int bufferPrePass_PropertyID = Shader.PropertyToID("_PrePass");
     private int bufferAfterPass_PropertyID = Shader.PropertyToID("_AfterPass");
 
     private CommandBuffer commandBuffer;
-    [SerializeField] private Camera targetCamera;
+    private Camera targetCamera;
     [SerializeField] private CameraEvent cameraEvent = CameraEvent.AfterForwardOpaque;
     [SerializeField] private Material material;
-
+    
 
 
 # if UNITY_EDITOR
@@ -53,11 +56,13 @@ public class MyCommandBuffer : MonoBehaviour
 
     private void OnEnable()
     {
+        Debug.Log("ON");
         Camera.onPreRender += ApplyCommandBuffer;
         Camera.onPostRender += RemoveCommandBuffer;
     }
     private void OnDisable()
     {
+        Debug.Log("OFF");
         Camera.onPreRender -= ApplyCommandBuffer;
         Camera.onPostRender -= RemoveCommandBuffer;
     }
@@ -129,7 +134,7 @@ public class MyCommandBuffer : MonoBehaviour
 
 
         // setup descriptor for descriptor of inverted alpha render texture
-        RenderTextureDescriptor MaskRTD = new RenderTextureDescriptor()
+        RenderTextureDescriptor maskRTD = new RenderTextureDescriptor()
         {
             dimension = TextureDimension.Tex2D,
             graphicsFormat = GraphicsFormat.A10R10G10B10_XRUNormPack32,
@@ -146,7 +151,7 @@ public class MyCommandBuffer : MonoBehaviour
             autoGenerateMips = true
         };
 
-        commandBuffer.GetTemporaryRT(maskBuffer, MaskRTD, FilterMode.Trilinear);
+        commandBuffer.GetTemporaryRT(maskBuffer, maskRTD, FilterMode.Trilinear);
 
         // render meshes to main buffer for the interior stencil mask
         commandBuffer.SetRenderTarget(maskBuffer);
@@ -160,8 +165,47 @@ public class MyCommandBuffer : MonoBehaviour
             }
         }
 
-        commandBuffer.SetRenderTarget(BuiltinRenderTextureType.CameraTarget);
+        //commandBuffer.SetRenderTarget(BuiltinRenderTextureType.CameraTarget);
 
+
+        // setup descriptor of inverted alpha render texture
+        RenderTextureDescriptor glowRTD = new RenderTextureDescriptor()
+        {
+            dimension = TextureDimension.Tex2D,
+            graphicsFormat = GraphicsFormat.A10R10G10B10_XRUNormPack32,
+
+            width = width,
+            height = height,
+
+            msaaSamples = msaa,
+            depthBufferBits = 0,
+
+            sRGB = false,
+
+            useMipMap = true,
+            autoGenerateMips = true
+        };
+
+
+        material.SetFloat("_Distance", blurSize);
+        material.SetFloat("_Sharpness", blurSharpness);
+        material.SetFloat("_MinLevel", minLevel);
+
+        // crate silhouette buffer and assign it as the current render target
+        commandBuffer.GetTemporaryRT(glowBuffer, glowRTD, FilterMode.Trilinear);
+        commandBuffer.Blit(maskBuffer, glowBuffer, material, SHADER_PASS_BLUR);
+
+        //material.SetTexture("_MainTex", BuiltinRenderTextureType.CameraTarget);
+        //material.SetColor("_RimLightColor", rimLightColor);
+        //commandBuffer.Blit(glowBuffer, BuiltinRenderTextureType.CameraTarget, material, SHADER_PASS_ADDITIVE);
+
+
+        //commandBuffer.SetGlobalTexture(glowBuffer, glowBuffer);
+
+
+        commandBuffer.ReleaseTemporaryRT(maskBuffer);
+        commandBuffer.ReleaseTemporaryRT(glowBuffer);
+        commandBuffer.ReleaseTemporaryRT(mainBuffer);
     }
 
     private void ApplyCommandBuffer(Camera cam)
