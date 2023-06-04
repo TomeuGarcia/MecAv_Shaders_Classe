@@ -38,10 +38,11 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _Anisotropy: 0.5
+    - _Anisotropy: 0.293
     - _MetallicValue: 0
     - _NormalValue: 1
-    - _SmoothnessValue: 0.5
+    - _SmoothnessValue: 0.251
     m_Colors:
+    - _AlbedoColor: {r: 1, g: 1, b: 1, a: 1}
     - _Ambient: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
   m_BuildTextureStacks: []

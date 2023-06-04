@@ -34,6 +34,7 @@ Shader "01_FXStack/Shader_01_FXStack_PostProcessing"
 
             sampler2D _MainTex;
             float4 _MainTex_ST;
+            fixed4 _RimLightColor;
 
             v2f vert (appdata v)
             {
@@ -44,8 +45,8 @@ Shader "01_FXStack/Shader_01_FXStack_PostProcessing"
             }
 
             fixed4 frag (v2f i) : SV_Target
-            {                
-                return fixed4(1,0, 0,1);
+            {   
+                return fixed4(1,1,1,1);             
             }
             ENDCG
         }
@@ -76,6 +77,7 @@ Shader "01_FXStack/Shader_01_FXStack_PostProcessing"
             float4 _MainTex_ST, _MainTex_TexelSize;
             float _Distance, _Sharpness;
             int _MinLevel;
+            fixed4 _RimLightColor;
 
 
             v2f vert (appdata v)
@@ -91,32 +93,35 @@ Shader "01_FXStack/Shader_01_FXStack_PostProcessing"
                 fixed4 sum = fixed4(0.0, 0.0, 0.0, 0.0);
 
                 sum += tex2Dlod(textureToBlur, half4(uv.x, uv.y - 4.0 * 0.05 * distance * textureTexelSize.y, 0, minLevel)) * 0.05;
-				sum += tex2Dlod(textureToBlur, half4(uv.x, uv.y - 3.0 * 0.05 * distance * textureTexelSize.y,0 ,minLevel)) * 0.09;
-				sum += tex2Dlod(textureToBlur, half4(uv.x, uv.y - 2.0 * 0.05 * distance * textureTexelSize.y,0, minLevel)) * 0.12;
-				sum += tex2Dlod(textureToBlur, half4(uv.x, uv.y, 0,6)) * 0.16;
-				sum += tex2Dlod(textureToBlur, half4(uv.x, uv.y + 2.0 * 0.05 * distance * textureTexelSize.y,0, minLevel)) * 0.12;
-				sum += tex2Dlod(textureToBlur, half4(uv.x, uv.y + 3.0 * 0.05 * distance * textureTexelSize.y,0, minLevel)) * 0.09;
-				sum += tex2Dlod(textureToBlur, half4(uv.x, uv.y + 4.0 * 0.05 * distance * textureTexelSize.y,0, minLevel)) * 0.05;
+				sum += tex2Dlod(textureToBlur, half4(uv.x, uv.y - 3.0 * 0.05 * distance * textureTexelSize.y, 0, minLevel)) * 0.09;
+				sum += tex2Dlod(textureToBlur, half4(uv.x, uv.y - 2.0 * 0.05 * distance * textureTexelSize.y, 0, minLevel)) * 0.12;
+				sum += tex2Dlod(textureToBlur, half4(uv.x, uv.y, 0, 6)) * 0.16;
+				sum += tex2Dlod(textureToBlur, half4(uv.x, uv.y + 2.0 * 0.05 * distance * textureTexelSize.y, 0, minLevel)) * 0.12;
+				sum += tex2Dlod(textureToBlur, half4(uv.x, uv.y + 3.0 * 0.05 * distance * textureTexelSize.y, 0, minLevel)) * 0.09;
+				sum += tex2Dlod(textureToBlur, half4(uv.x, uv.y + 4.0 * 0.05 * distance * textureTexelSize.y, 0, minLevel)) * 0.05;
  
-                sum += tex2Dlod(textureToBlur, half4(uv.x - 4.0 * 0.05* distance * textureTexelSize.x, uv.y, 0, minLevel)) * 0.05;
-				sum += tex2Dlod(textureToBlur, half4(uv.x - 3.0 * 0.05* distance * textureTexelSize.x, uv.y, 0, minLevel)) * 0.09;
-				sum += tex2Dlod(textureToBlur, half4(uv.x - 2.0 * 0.05* distance * textureTexelSize.x, uv.y, 0, minLevel)) * 0.12;
-				sum += tex2Dlod(textureToBlur, half4(uv.x, uv.y,0,6)) * 0.16;
-				sum += tex2Dlod(textureToBlur, half4(uv.x + 2.0 * 0.05* distance * textureTexelSize.x, uv.y, 0, minLevel)) * 0.12;
-				sum += tex2Dlod(textureToBlur, half4(uv.x + 3.0 * 0.05* distance * textureTexelSize.x, uv.y, 0, minLevel)) * 0.09;
-				sum += tex2Dlod(textureToBlur, half4(uv.x + 4.0 * 0.05* distance * textureTexelSize.x, uv.y, 0, minLevel)) * 0.05;
+                sum += tex2Dlod(textureToBlur, half4(uv.x - 4.0 * 0.05 * distance * textureTexelSize.x, uv.y, 0, minLevel)) * 0.05;
+				sum += tex2Dlod(textureToBlur, half4(uv.x - 3.0 * 0.05 * distance * textureTexelSize.x, uv.y, 0, minLevel)) * 0.09;
+				sum += tex2Dlod(textureToBlur, half4(uv.x - 2.0 * 0.05 * distance * textureTexelSize.x, uv.y, 0, minLevel)) * 0.12;
+				sum += tex2Dlod(textureToBlur, half4(uv.x, uv.y, 0, 6)) * 0.16;
+				sum += tex2Dlod(textureToBlur, half4(uv.x + 2.0 * 0.05 * distance * textureTexelSize.x, uv.y, 0, minLevel)) * 0.12;
+				sum += tex2Dlod(textureToBlur, half4(uv.x + 3.0 * 0.05 * distance * textureTexelSize.x, uv.y, 0, minLevel)) * 0.09;
+				sum += tex2Dlod(textureToBlur, half4(uv.x + 4.0 * 0.05 * distance * textureTexelSize.x, uv.y, 0, minLevel)) * 0.05;
 
                 return sum;
             }
 
             fixed4 frag (v2f i) : SV_Target
-            {                
+            {                                
                 fixed4 color = tex2Dlod(_MainTex, float4(i.uv, 0, 0));
                 
                 fixed4 blur = Blur(_MainTex, _MainTex_TexelSize, i.uv, _Distance, _MinLevel);              
 
-                //return saturate(blur) - color;                
-                return pow(saturate(blur), _Sharpness) - color;                
+                //return blur;
+                //return blur;
+                //return color;
+                //return (saturate(blur) - color) * _RimLightColor;
+                return (pow(saturate(blur), _Sharpness) - color) * _RimLightColor;                
             }
             ENDCG
         }
@@ -126,6 +131,7 @@ Shader "01_FXStack/Shader_01_FXStack_PostProcessing"
         Pass
         {
             Name "Additive"
+            Blend One One
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
@@ -146,7 +152,6 @@ Shader "01_FXStack/Shader_01_FXStack_PostProcessing"
 
             sampler2D _MainTex, _CameraGlow;
             float4 _MainTex_ST, _MainTex_TexelSize;
-            fixed4 _RimLightColor;
             
 
             v2f vert (appdata v)
@@ -158,11 +163,12 @@ Shader "01_FXStack/Shader_01_FXStack_PostProcessing"
             }
 
             fixed4 frag (v2f i) : SV_Target
-            {                
-                return _RimLightColor;
-                return tex2D(_CameraGlow, i.uv) * _RimLightColor;
+            {                            
+                fixed4 col = tex2D(_MainTex, i.uv);    
+                return col;
             }
             ENDCG
         }
+        
     }
 }

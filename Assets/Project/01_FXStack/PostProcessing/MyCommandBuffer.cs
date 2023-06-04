@@ -151,6 +151,12 @@ public class MyCommandBuffer : MonoBehaviour
             autoGenerateMips = true
         };
 
+
+        material.SetFloat("_Distance", blurSize);
+        material.SetFloat("_Sharpness", blurSharpness);
+        material.SetFloat("_MinLevel", minLevel);
+        material.SetColor("_RimLightColor", rimLightColor);
+
         commandBuffer.GetTemporaryRT(maskBuffer, maskRTD, FilterMode.Trilinear);
 
         // render meshes to main buffer for the interior stencil mask
@@ -161,7 +167,6 @@ public class MyCommandBuffer : MonoBehaviour
             for (int subMeshI = 0; subMeshI < subMeshCount[rendererI]; ++subMeshI)
             {
                 commandBuffer.DrawRenderer(renderers[rendererI], material, subMeshI, SHADER_PASS_MASK);
-
             }
         }
 
@@ -187,20 +192,15 @@ public class MyCommandBuffer : MonoBehaviour
         };
 
 
-        material.SetFloat("_Distance", blurSize);
-        material.SetFloat("_Sharpness", blurSharpness);
-        material.SetFloat("_MinLevel", minLevel);
+
 
         // crate silhouette buffer and assign it as the current render target
         commandBuffer.GetTemporaryRT(glowBuffer, glowRTD, FilterMode.Trilinear);
         commandBuffer.Blit(maskBuffer, glowBuffer, material, SHADER_PASS_BLUR);
 
-        //material.SetTexture("_MainTex", BuiltinRenderTextureType.CameraTarget);
-        //material.SetColor("_RimLightColor", rimLightColor);
-        //commandBuffer.Blit(glowBuffer, BuiltinRenderTextureType.CameraTarget, material, SHADER_PASS_ADDITIVE);
+        commandBuffer.SetRenderTarget(BuiltinRenderTextureType.CameraTarget);
 
-
-        //commandBuffer.SetGlobalTexture(glowBuffer, glowBuffer);
+        commandBuffer.Blit(glowBuffer, BuiltinRenderTextureType.CameraTarget, material, SHADER_PASS_ADDITIVE);
 
 
         commandBuffer.ReleaseTemporaryRT(maskBuffer);

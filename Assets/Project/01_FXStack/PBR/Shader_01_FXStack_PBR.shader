@@ -3,15 +3,16 @@ Shader "01_FXStack/Shader_01_FXStack_PBR"
     Properties
     {
         _MainTex ("Texture", 2D) = "white" {}
+        _AlbedoColor("Albedo Color", Color) = (1,1,1,1)
 
         _NormalTex ("Normal Texture", 2D) = "bump" {}
         _NormalValue ("Normal multiplier", Range(0, 1)) = 1
 
         _SmoothnessTex ("Smoothness Tex",2D) = "black" {}
-        _SmoothnessValue ("Smoothness multiplier", Range(0, 10)) = 1
+        _SmoothnessValue ("Smoothness multiplier", Range(0, 1)) = 0.5
 
         _MetallicTex ("Metallic Tex",2D) = "black" {}
-        _MetallicValue ("Metallic multiplier", Range(0, 10)) = 1
+        _MetallicValue ("Metallic multiplier", Range(0, 1)) = 1
 
         _Anisotropy("Anisotropy", Range(0, 1)) = 0
 
@@ -56,7 +57,7 @@ Shader "01_FXStack/Shader_01_FXStack_PBR"
             sampler2D _NormalTex, _SmoothnessTex, _MetallicTex;
             float _NormalValue, _SmoothnessValue, _MetallicValue;
             float _Anisotropy;
-            fixed4 _Ambient;
+            fixed4 _Ambient, _AlbedoColor;
 
 
             
@@ -142,12 +143,12 @@ Shader "01_FXStack/Shader_01_FXStack_PBR"
             fixed4 frag (v2f i) : SV_Target
             {
                 // sample the texture
-                fixed4 albedo = tex2D(_MainTex, i.uv);
+                fixed4 albedo = tex2D(_MainTex, i.uv) * _AlbedoColor;
 
                 // normal and tangent calc
                 half3 normalWS = normalize(i.normalWS);
                 half3 normalTS = UnpackNormal(tex2D(_NormalTex, i.uv));
-                float3x3 tangentToWorld = CreateTangentToWorld(normalWS, i.tangentWS.xyz, i.tangentWS.w);
+                float3x3 tangentToWorld = CreateTangentToWorld(normalWS, i.tangentWS.xyz * _NormalValue, i.tangentWS.w);
                 normalWS = TransformTangentToWorld(normalTS, tangentToWorld);                
 
                 // calculate additional vectors
